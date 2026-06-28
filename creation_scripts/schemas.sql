@@ -30,7 +30,7 @@ IF NOT EXISTS (
         name = N'locations'
 )EXEC ('CREATE SCHEMA locations;');
 
-IF NOT EXISTS (
+IF NOT EXISTS (  -- noqa: CV06
     SELECT name
     FROM
         sys.schemas

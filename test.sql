@@ -1,2 +1,1 @@
-
-SELECT @@VERSION
+DROP FUNCTION dbo.fn_IsValidURL

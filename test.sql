@@ -1,1 +1,1 @@
-DROP FUNCTION dbo.fn_IsValidURL
+SELECT UserId FROM users.UserAccount;

@@ -21,6 +21,28 @@
                 "env": {
                     "IN_DEV": "true"
                 }
+            },
+            "presentation": {
+                "reveal": "never",
+                "revealProblems": "onProblem",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "problemMatcher": {
+                "owner": "powershell-sql",
+                "fileLocation": "relative",
+                "pattern": [
+                    {
+                        "regexp": "^Error in:\\s+(.*)\\.$",
+                        "file": 1,
+                        "kind": "file"
+                    },
+                    {
+                        "regexp": "^Reason:\\s+(.*)$",
+                        "message": 1,
+                        "loop": true
+                    }
+                ]
             }
         }
     ]

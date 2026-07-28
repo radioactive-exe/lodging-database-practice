@@ -70,7 +70,7 @@ ON users.UserProfile
 AFTER UPDATE
 AS
 BEGIN
-    -- ? Unneeded tracking of trigger instructions
+    -- ? Unneeded response of rows affected
     SET NOCOUNT ON;
 
     -- ? Merge a row with the updated time into the newly updated row
@@ -80,5 +80,7 @@ BEGIN
     FROM users.UserProfile
     INNER JOIN inserted ON (UserProfile.UserId = inserted.UserId);
 END;
+
+GO
 
 PRINT 'Created User Profile `ModifiedAt` updating trigger.';

@@ -1,0 +1,9 @@
+{
+    "version": "0.2",
+    "ignorePaths": ["./population_scripts/airbnb_locations/locations_data.sql"],
+    "dictionaryDefinitions": [],
+    "dictionaries": [],
+    "words": [],
+    "ignoreWords": [],
+    "import": []
+}

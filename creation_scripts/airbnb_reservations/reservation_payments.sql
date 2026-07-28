@@ -171,7 +171,7 @@ ON reservations.Payments
 AFTER INSERT
 AS
 BEGIN
-    -- ? Unneeded tracking of trigger instructions
+    -- ? Unneeded response of rows affected
     SET NOCOUNT ON;
 
     -- ? Merge a row with the calculated remaining balance into the newly updated row
@@ -187,5 +187,7 @@ BEGIN
     FROM reservations.Payments
     INNER JOIN inserted AS NewPayment ON Payments.PaymentId = NewPayment.PaymentId;
 END;
+
+GO
 
 PRINT 'Created Booking Payment `AmountRemaining` population function.';

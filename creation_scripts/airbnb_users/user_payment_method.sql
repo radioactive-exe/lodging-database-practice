@@ -202,7 +202,7 @@ ON users.PaymentMethod
 AFTER INSERT, UPDATE
 AS
 BEGIN
-    -- ? Unneeded tracking of trigger instructions
+    -- ? Unneeded response of rows affected
     SET NOCOUNT ON;
 
     -- ? The current month & year

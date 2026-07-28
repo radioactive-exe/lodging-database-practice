@@ -3,7 +3,7 @@ dialect = tsql
 templater = jinja
 sql_file_exts = .sql,.sql.j2,.dml,.ddl
 output_line_length = 80
-max_line_length = 200
+max_line_length = 250
 large_file_skip_byte_limit = 30000
 
 [sqlfluff:indentation]

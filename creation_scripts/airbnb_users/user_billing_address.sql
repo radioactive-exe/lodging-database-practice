@@ -17,11 +17,12 @@ CREATE TABLE users.BillingAddress (
     /* Address Location info
     ===================================== */
 
-    -- * For example, street/floor/building
+    -- * For example, street/area/block
     AddressLine1   nvarchar(100) NOT NULL,
-    -- * For example, city/state/area
-    AddressLine2   nvarchar(100) NOT NULL,
-    ZipCode        nvarchar(20) NOT NULL,
+    -- * For example, room/floor/building
+    AddressLine2   nvarchar(100),
+    -- ? Renamed to include global codes, and made nullable because some countries don't have them at all
+    PostalCode     nvarchar(20),
     AddressCountry smallint NOT NULL,
 
     /* Constraints

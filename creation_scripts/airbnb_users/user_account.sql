@@ -42,6 +42,10 @@ users.UserAccount (
 
     -- * The Primary Key Constraint for the user account
     CONSTRAINT PK_UserId PRIMARY KEY CLUSTERED (UserId),
+
+    -- * The Foreign Key Constraint for the user tier id
+    CONSTRAINT FK_UserAccount_UserTier FOREIGN KEY (UserTier) REFERENCES users.UserTier (TierId),
+
     -- ? Checks that the phone number is a valid international number
     CONSTRAINT CHK_Valid_PhoneNumber CHECK (dbo.FN_IsValidPhoneNumber(PhoneNumber) = 1),
     -- ? Checks that the email is valid
@@ -60,7 +64,7 @@ ON users.UserAccount
 AFTER UPDATE
 AS
 BEGIN
-    -- ? Unneeded tracking of trigger instructions
+    -- ? Unneeded response of rows affected
     SET NOCOUNT ON;
 
     -- ? Merge a row with the updated time into the newly updated row
@@ -70,5 +74,7 @@ BEGIN
     FROM users.UserAccount
     INNER JOIN inserted ON (UserAccount.UserId = inserted.UserId);
 END;
+
+GO
 
 PRINT 'Created User Account `ModifiedAt` updating trigger.';

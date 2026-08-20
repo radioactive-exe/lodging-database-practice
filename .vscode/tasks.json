@@ -23,7 +23,7 @@
                 }
             },
             "presentation": {
-                "reveal": "never",
+                "reveal": "always",
                 "revealProblems": "onProblem",
                 "showReuseMessage": false,
                 "clear": true

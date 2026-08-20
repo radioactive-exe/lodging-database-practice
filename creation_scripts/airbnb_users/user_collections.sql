@@ -19,7 +19,7 @@ CREATE TABLE users.UserCollections (
 
     -- * Basic Collection info
     CollectionName nvarchar(30) NOT NULL,
-    CollectionDesc nvarchar(200),
+    CollectionDesc nvarchar(256),
 
     -- * Collection Classification
     IsFavourites   bit DEFAULT (0) NOT NULL,
@@ -39,3 +39,46 @@ CREATE TABLE users.UserCollections (
 );
 
 PRINT 'Created User Collection table.';
+
+CREATE UNIQUE NONCLUSTERED INDEX
+UX_UserCollections_CreatorId_SingleFavourites
+    ON users.UserCollections (CreatorId)
+    WHERE IsFavourites = 1;
+
+PRINT 'Created One-Favourites-Collection-Per-User User Collections Table Validating Index.';
+
+GO
+
+/**
+*
+* The trigger that inserts a favourites collection into the collections table when
+* a new user joins
+*
+*/
+
+CREATE TRIGGER users.TR_UserCollection_InsertFavouritesOnUserJoin
+ON users.UserAccount
+AFTER INSERT
+AS
+BEGIN
+-- ? Unneeded response of rows affected
+    SET NOCOUNT ON;
+
+    INSERT INTO
+    users.UserCollections (
+        CreatorId,
+        CollectionName,
+        CollectionDesc,
+        IsFavourites,
+        IsPublic
+    )
+    SELECT
+        inserted.UserId,
+        'Favourites'                          AS CollectionName,
+        'Your default Favourites collection.' AS CollectionDesc,
+        1                                     AS IsFavourites,
+        1                                     AS IsPublic
+    FROM inserted
+    ORDER BY inserted.UserId ASC;
+END;
+GO

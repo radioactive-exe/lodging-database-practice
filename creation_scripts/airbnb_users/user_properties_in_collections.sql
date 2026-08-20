@@ -32,4 +32,4 @@ CREATE TABLE users.PropertiesInCollections (
     CONSTRAINT FK_PropertyInCollection_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId),
 );
 
-PRINT 'Created Property-Collection Relationship table.';
+PRINT 'Created Assigned Property-Collection Relationship table.';

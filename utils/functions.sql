@@ -206,7 +206,7 @@ BEGIN
 
     -- * The regexp that outlines the allowed format/characters in a technical username,
     -- * which allows letters, numbers, hyphens, and underscores, and starting with an @
-    DECLARE @Username nvarchar(30) = N'^@[A-Za-z0-9_-]$';
+    DECLARE @Username nvarchar(30) = N'^@[A-Za-z0-9_-]{1,29}$';
 
     RETURN CASE
         WHEN

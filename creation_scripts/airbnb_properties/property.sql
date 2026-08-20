@@ -30,7 +30,11 @@ CREATE TABLE properties.Property (
     NumOfSectors        tinyint DEFAULT (1) NOT NULL,
 
     -- * The nightly cost to rent this property
-    PerNightCost        decimal(14, 2) NOT NULL,
+    PerNightCost        decimal(14, 2) DEFAULT (0) NOT NULL,
+
+    -- * The nightly fees for this property
+    CleaningFeePerNight decimal(14, 2) DEFAULT (0) NOT NULL,
+    ServiceFeePerNight  decimal(14, 2) DEFAULT (0) NOT NULL,
 
     /* Property Location
     ===================================== */
@@ -55,7 +59,12 @@ CREATE TABLE properties.Property (
     -- * Foreign key constraints for the property location, type, and host
     CONSTRAINT FK_Property_Location FOREIGN KEY (LocationId) REFERENCES locations.Location (LocationId),
     CONSTRAINT FK_Property_Type FOREIGN KEY (PropertyTypeId) REFERENCES properties.PropertyType (TypeId),
-    CONSTRAINT FK_Property_Host FOREIGN KEY (HostId) REFERENCES users.UserAccount (UserId)
+    CONSTRAINT FK_Property_Host FOREIGN KEY (HostId) REFERENCES users.UserAccount (UserId),
+
+    -- * Nonnegative constraints on fees and prices
+    CONSTRAINT CHK_NonNegative_Property_BasePriceNight CHECK (PerNightCost >= 0),
+    CONSTRAINT CHK_NonNegative_Property_CleaningFeeNight CHECK (CleaningFeePerNight >= 0),
+    CONSTRAINT CHK_NonNegative_Property_ServiceFeeNight CHECK (ServiceFeePerNight >= 0),
 );
 
 PRINT 'Created Property table.';

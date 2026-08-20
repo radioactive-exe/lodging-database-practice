@@ -1,5 +1,6 @@
 -- ? Unneeded response of rows affected
-SET NOCOUNT ON;
+SET
+    NOCOUNT ON;
 
 /* =====================================
 =    Filling out the User Tiers LUT    =
@@ -89,7 +90,7 @@ VALUES
     'Distinguished Host',
     'Hosts who have begun proving their loyalty to the platform and hospitality.',
     1,
-    1.02,
+    0.98,
     'At least 3 non-cancelled bookings in the last 6 months, with a total User Rating of 4.5 or more.',
     3,
     4.5,
@@ -101,7 +102,7 @@ VALUES
     'Super Host',
     'Hosts recognised by the community for their hospitality, consistency, and notable service.',
     2,
-    1.05,
+    0.92,
     'At least 10 non-cancelled bookings in the last year (12 months), with a total User Rating of 4.8 or more.',
     10,
     4.8,
@@ -113,16 +114,14 @@ VALUES
     'Ultimate Host',
     'Hosts that are notably outstanding in their services, standing out from the rest as consistent guest favourites and Airbnb ambassadors.',
     3,
-    1.12,
+    0.88,
     'At least 25 non-cancelled bookings in the last year (12 months), with a total User Rating of 4.9 or more.',
     25,
     4.9,
     12
 );
 
-PRINT 'Filled out User Tier LUT.';
-
-GO
+PRINT 'Populated User Tier LUT.';
 
 /* =====================================
 =  Filling out the User Account table  =
@@ -137,6 +136,10 @@ users.UserAccount (
     HostingSince
 )
 VALUES
+
+/* These are 25 users
+===================================== */
+
 (
     6,
     'ichiese0@dropbox.com',
@@ -313,9 +316,7 @@ VALUES
     NULL
 );
 
-PRINT 'Filled out User Account table.';
-
-GO
+PRINT 'Populated User Account table.';
 
 /* =====================================
 =  Filling out the User Profiles table =
@@ -336,6 +337,10 @@ users.UserProfile (
     LinkedinLink
 )
 VALUES
+
+/* Also 25 profiles respectively
+===================================== */
+
 (
     1,
     'Rowan',
@@ -562,9 +567,7 @@ VALUES
     NULL
 );
 
-PRINT 'Filled out User Profile table.';
-
-GO
+PRINT 'Populated User Profile table.';
 
 /* =====================================
 =    Filling out the Languages LUT     =
@@ -573,6 +576,10 @@ GO
 INSERT INTO
 users.Languages (LangName)
 VALUES
+
+/* These are 25 languages
+===================================== */
+
 ('Afrikaans'),
 ('Akan'),
 ('Bosnian'),
@@ -599,9 +606,7 @@ VALUES
 ('Swedish'),
 ('Tigrinya');
 
-PRINT 'Filled out Languages LUT.';
-
-GO
+PRINT 'Populated Languages LUT.';
 
 /* =====================================
 = Filling out the User-Languages table =
@@ -610,6 +615,10 @@ GO
 INSERT INTO
 users.UserLanguages (LangId, UserId)
 VALUES
+
+/* These are 50 user-language relations
+===================================== */
+
 (1, 2),
 (1, 24),
 (2, 6),
@@ -661,4 +670,4 @@ VALUES
 (25, 2),
 (25, 5);
 
-PRINT 'Filled out User-Languages relationship table.';
+PRINT 'Populated Assigned User-Languages relationship table.';

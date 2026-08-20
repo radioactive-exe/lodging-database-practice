@@ -148,7 +148,7 @@ $DatabaseCreationFiles = @(
     "creation_scripts/airbnb_properties/property_category.sql",
     "creation_scripts/airbnb_properties/property_attribute.sql",
 
-    # ! And this table from the users schema, which needs the property table already defined
+    # ! This table from the users schema needs the property table already defined
     "creation_scripts/airbnb_users/user_properties_in_collections.sql"
 
     <# Reservation schema tables
@@ -179,7 +179,11 @@ $DatabasePopulationFiles = @(
 
     "population_scripts/locations_data.sql",
     "population_scripts/user_account_and_profiles_data.sql",
-    "population_scripts/user_billing_data.sql"
+    "population_scripts/user_billing_data.sql",
+    "population_scripts/property_data.sql",
+    "population_scripts/user_collection_data.sql",
+    "population_scripts/booking_data.sql",
+    "population_scripts/review_data.sql"
 )
 
 Write-Host "`nBuilding Functions, Schemas, and tables..." -ForegroundColor Green
@@ -264,4 +268,4 @@ foreach ($FilePath in $DatabasePopulationFiles) {
 }
 
 
-Write-Host "`n  /========================================/`n / All done Populating the Airbnb Database. / `n/========================================/  " -ForegroundColor Cyan -BackgroundColor DarkCyan
+Write-Host "`n  /==========================================/`n / All done Populating the Airbnb Database. / `n/==========================================/  " -ForegroundColor Cyan -BackgroundColor DarkCyan

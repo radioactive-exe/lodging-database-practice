@@ -12,18 +12,20 @@ CREATE TABLE reviews.PropertyReview (
     ===================================== */
 
     ReviewId            bigint IDENTITY (1, 1) NOT NULL,
-    -- ? The property being reviewed
-    PropertyId          bigint NOT NULL,
+    -- ! There was also a property id FK that referenced the property being reviewed,
+    -- ! but given that the booking table's row has the property ID, having the property here
+    -- ! as well may violate normal forms, and it introduces another point of error (what if
+    -- ! a different property ID is inserted here from the frontend?).
+    -- ? The specific booking linked with this review
+    AssociatedBookingId bigint NOT NULL,
     -- ? The user making this review
     ReviewerId          bigint NOT NULL,
-    -- ? The specific booking of the property above linked with this review
-    AssociatedBookingId bigint NOT NULL,
 
     /* Review Content
     ===================================== */
 
     ReviewTitle         nvarchar(100) NOT NULL,
-    ReviewComment       nvarchar(500) NOT NULL,
+    ReviewComment       nvarchar(1000) NOT NULL,
     ReviewedOn          datetime2 DEFAULT (SYSUTCDATETIME()) NOT NULL,
 
     -- ! There is a total rating column in this table that dynamically gets the
@@ -49,14 +51,13 @@ CREATE TABLE reviews.PropertyReview (
     -- ? Primary key constraint for the review ID
     CONSTRAINT PK_PropertyReviewId PRIMARY KEY CLUSTERED (ReviewId),
 
-    -- ? Foreign key constraints for the property, reviewer, and booking IDs
-    CONSTRAINT FK_PropertyReview_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId),
-    CONSTRAINT FK_PropertyReview_Reviewer FOREIGN KEY (ReviewerId) REFERENCES users.UserAccount (UserId),
+    -- ? Foreign key constraints for the reviewer and booking IDs
     CONSTRAINT FK_PropertyReview_Booking FOREIGN KEY (AssociatedBookingId) REFERENCES reservations.PropertyBookings (BookingId),
+    CONSTRAINT FK_PropertyReview_Reviewer FOREIGN KEY (ReviewerId) REFERENCES users.UserAccount (UserId),
 
     -- ? Unique constraint for the booking-user-property trio, ensuring a user can't rate a property for a same booking twice (they can edit),
     -- ? but that is frontend functionality. This constraint was not in the original plan, but it makes sense more now
-    CONSTRAINT UQ_PropertyReview_Booking_Reviewer_Property UNIQUE (PropertyId, ReviewerId, AssociatedBookingId)
+    CONSTRAINT UQ_PropertyReview_Booking_Reviewer_Property UNIQUE (AssociatedBookingId, ReviewerId)
 );
 
 PRINT 'Created Property Review (without Total Rating) table.';

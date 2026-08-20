@@ -30,30 +30,28 @@ CREATE TABLE reservations.PropertyBookings (
     /* Booking Finances
     ===================================== */
 
-    -- * The price per night
+    -- * The base price per night
     -- ! This was broken down into the 3 separate parts after realising relying on the frontend
     -- ! for appropriate record keeping, as well as continuous FK relationships might not be good
     -- ! for records. For example, getting the financial modifier from the UserId > TierId > Mod is unreliable
     -- ! as the user might have changed tiers between the booking date and query date
     BasePricePerNight        decimal(14, 2) DEFAULT (0) NOT NULL,
+
+    -- * The financial modifier applied to this booking
     AppliedFinancialModifier decimal(3, 2) DEFAULT (0) NOT NULL,
-    -- * The computed column from the base price and financial discount/modifier
-    FinalPricePerNight AS (BasePricePerNight * AppliedFinancialModifier) PERSISTED,
+
+    -- * The computed price per night
+    FinalPricePerNight       decimal(14, 2) DEFAULT (0) NOT NULL,
 
     -- * Fees per night
     ServiceFeePerNight       decimal(14, 2) DEFAULT (0) NOT NULL,
     CleaningFeePerNight      decimal(14, 2) DEFAULT (0) NOT NULL,
 
+    -- * The total price per night, with fees
+    TotalPricePerNight       decimal(15, 2) DEFAULT (0) NOT NULL,
+
     -- * The total booking cost, computed from all nightly costs multiplied by the number of nights
-    TotalBookingCost AS (
-        (
-            -- ? FinalPricePerNight needs to be rewritten as you cannot use a Computed col in another
-            -- ? computed col in SQL Server 2025
-            (BasePricePerNight * AppliedFinancialModifier)
-            + ServiceFeePerNight + CleaningFeePerNight
-        )
-        * DATEDIFF(DAY, StartDate, EndDate)
-    ) PERSISTED,
+    TotalBookingCost         decimal(16, 2) DEFAULT (0) NOT NULL,
 
     /* Constraints
     ===================================== */
@@ -70,6 +68,7 @@ CREATE TABLE reservations.PropertyBookings (
     CONSTRAINT CHK_NonNegative_FinalPriceNight CHECK (FinalPricePerNight >= 0),
     CONSTRAINT CHK_NonNegative_ServiceFeeNight CHECK (ServiceFeePerNight >= 0),
     CONSTRAINT CHK_NonNegative_CleaningFeeNight CHECK (CleaningFeePerNight >= 0),
+    CONSTRAINT CHK_NonNegative_TotalNightCost CHECK (TotalPricePerNight >= 0),
     CONSTRAINT CHK_NonNegative_TotalCost CHECK (TotalBookingCost >= 0),
 
     -- * Date validation
@@ -84,3 +83,72 @@ CREATE TABLE reservations.PropertyBookings (
 );
 
 PRINT 'Created Property Bookings table.';
+
+GO
+
+/**
+*
+* The trigger that calculates and populates the price info for a booking based on the property pricing
+*
+*/
+
+CREATE TRIGGER reservations.TR_Bookings_PopulatePriceInfo
+ON reservations.PropertyBookings
+AFTER INSERT
+AS
+BEGIN
+    -- ? Unneeded response of rows affected
+    SET NOCOUNT ON;
+
+    -- ? Merge a row with the calculated and populated booking price info into the newly updated row
+    UPDATE PropertyBookings
+    SET
+        -- * The base price per night
+        PropertyBookings.BasePricePerNight = Prop.PerNightCost,
+
+        -- * The fees per night
+        PropertyBookings.CleaningFeePerNight = Prop.CleaningFeePerNight,
+        PropertyBookings.ServiceFeePerNight = Prop.ServiceFeePerNight,
+
+        -- * The financial modifier applied to this booking
+        PropertyBookings.AppliedFinancialModifier = UsrTr.TierFinancialModifier,
+
+        -- * The modified price per night
+        PropertyBookings.FinalPricePerNight = Prop.PerNightCost * UsrTr.TierFinancialModifier,
+
+        -- * The total booking cost per night, including the fees
+        PropertyBookings.TotalPricePerNight = Prop.PerNightCost * UsrTr.TierFinancialModifier + Prop.CleaningFeePerNight + Prop.ServiceFeePerNight,
+
+        -- * And lastly, the total booking cost for the entire reservation/booking
+        PropertyBookings.TotalBookingCost = (
+            Prop.PerNightCost * UsrTr.TierFinancialModifier
+            + Prop.CleaningFeePerNight + Prop.ServiceFeePerNight
+        ) * DATEDIFF(DAY, Ins.StartDate, Ins.EndDate)
+
+    FROM reservations.PropertyBookings AS Bks
+    -- ? And join the tables for the relevant data
+
+    -- * The inserted row for the new data
+    INNER JOIN
+        inserted AS Ins
+        ON Bks.BookingId = Ins.BookingId
+
+    -- * The property table for base property info
+    INNER JOIN
+        properties.Property AS Prop
+        ON Ins.PropertyId = Prop.PropertyId
+
+    -- * The user account table to get the user's tier
+    INNER JOIN
+        users.UserAccount AS UsrAc
+        ON Ins.BookerId = UsrAc.UserId
+
+    -- * The user tier table to get the tier financial modifier
+    INNER JOIN
+        users.UserTier AS UsrTr
+        ON UsrAc.UserTier = UsrTr.TierId;
+END;
+
+GO
+
+PRINT 'Created Booking Price Info population function.';

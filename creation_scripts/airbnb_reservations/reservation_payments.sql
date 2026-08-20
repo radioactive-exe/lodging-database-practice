@@ -34,7 +34,7 @@ CREATE TABLE reservations.Payments (
     PayeeId          bigint NOT NULL,
 
     -- * The amount paid in this transaction
-    PaidAmount       decimal(14, 2) NOT NULL,
+    PaidAmount       decimal(14, 2) DEFAULT (0) NOT NULL,
 
     -- ! The columns below were initially not in the plan, but while developing this database's
     -- ! tables it seemed completely logical to add them
@@ -43,7 +43,7 @@ CREATE TABLE reservations.Payments (
     PaidOn           datetime2 DEFAULT (SYSUTCDATETIME()) NOT NULL,
 
     -- * Any optional comment attached to the payment
-    PaymentComment   nvarchar(500),
+    PaymentComment   nvarchar(500) DEFAULT ('') NOT NULL,
 
     -- * The remaining amount/balance for the booking after this payment is accumulated
     AmountRemaining  decimal(14, 2) DEFAULT (0.0) NOT NULL,
@@ -102,7 +102,7 @@ BEGIN
     -- ? Declaring and populating the associated booking's cost and status (to check if it's cancelled later on)
     DECLARE @FullCost decimal(14, 2);
     DECLARE @AssociatedBookingStatus tinyint;
-    -- 1. Fetch original cost and status
+    -- ? Fetch original cost and status
     SELECT
         @FullCost = PropertyBookings.TotalBookingCost,
         @AssociatedBookingStatus = PropertyBookings.BookingStatusId
@@ -114,10 +114,29 @@ BEGIN
     SELECT @CancelledStatusID = StatusId FROM reservations.BookingStatus
     WHERE StatusName = 'Cancelled';
 
-    -- ? Get and store the defined ID for a Refund payment Purpose
-    DECLARE @RefundPurposeID tinyint;
-    SELECT @RefundPurposeID = PurposeId FROM reservations.PaymentPurpose
-    WHERE PurposeName = 'Refund';
+    -- ? Get and store the defined IDs for payments that add onto the remaining balance
+    -- ? i.e. refunds, security deposits, damages, etc.
+    DECLARE @NegativePurposeIds TABLE (
+        PurposeId tinyint
+    );
+    INSERT INTO
+    @NegativePurposeIds (PurposeId)
+    (
+        SELECT PurposeId FROM reservations.PaymentPurpose
+        WHERE PurposeName IN ('Refund', 'Additional Charge', 'Security Deposit Claim', 'Tax')
+    );
+
+    -- ? Get and store the defined IDs for payments that have no effect on the remaining balance
+    -- ? i.e. host/co-host payouts, commission fees, etc.
+    DECLARE @ZeroingPurposeIds TABLE (
+        PurposeId tinyint
+    );
+    INSERT INTO
+    @ZeroingPurposeIds (PurposeId)
+    (
+        SELECT PurposeId FROM reservations.PaymentPurpose
+        WHERE PurposeName IN ('Payout', 'Co-Host Payout', 'Host Referral Bonus', 'Platform Commission Fee')
+    );
 
     -- ? If the booking we are tracking has been cancelled, then the full cost starting point is now nothing
     -- ! If there were a cancellation fee implemented in the hypothetical airbnb system we are making, then it would simply be that number
@@ -129,10 +148,23 @@ BEGIN
     -- ? Now, we sum up all previous payments (before this new/last one)
     SELECT
         @CumulativeSum = SUM(
-            -- ? Add either the paid amount or subtract it/add its negative if it was a refund
-            Payments.PaidAmount * IIF(Payments.PaymentPurposeId = @RefundPurposeId, -1, 1)
+            -- ? Add either the paid amount or subtract it/add its negative if it was a refund/add
+            CASE
+                -- ? The join means that if the isn't null then the payment was of a specific type (i.e. the join returned data)
+
+                -- ? If this is a payment that Increases Balance (Money given back OR extra charges)
+                WHEN NegIds.PurposeId IS NOT NULL THEN -Payments.PaidAmount
+
+                -- ? If this is a payment that has no impact on the balance (such as a host payout)
+                WHEN ZeroIds.PurposeId IS NOT NULL THEN 0
+
+                ELSE Payments.PaidAmount
+            END
+
         )
     FROM reservations.Payments
+    LEFT JOIN @NegativePurposeIds AS NegIds ON Payments.PaymentPurposeId = NegIds.PurposeId
+    LEFT JOIN @ZeroingPurposeIds AS ZeroIds ON Payments.PaymentPurposeId = ZeroIds.PurposeId
     WHERE
         -- ? Make sure to check this booking's records, and those previous to the new one whose trigger is calling this function
         Payments.AssocBookingId = @BookingID
@@ -143,9 +175,18 @@ BEGIN
         -- ? Subtract the cumulative paid balance so far (2/3)
         ISNULL(@CumulativeSum, 0)
         + (
-            -- ? And then add (or subtract/add the negative of) the newest payment, and voila
-            @NewPaidAmount
-            * IIF(@NewPaymentPurpose = @RefundPurposeId, -1, 1)
+            -- ? And then add (or subtract/add the negative of) the newest payment if needed, and voila
+            CASE
+                -- ? If this is a payment that Increases Balance (Money given back OR extra charges)
+                WHEN @NewPaymentPurpose IN (SELECT NIds.PurposeId FROM @NegativePurposeIds AS NIds)
+                    THEN -@NewPaidAmount
+
+                -- ? If this is a payment that has no impact on the balance (such as )
+                WHEN @NewPaymentPurpose IN (SELECT ZIds.PurposeId FROM @ZeroingPurposeIds AS ZIds)
+                    THEN 0.00
+
+                ELSE @NewPaidAmount
+            END
         )
     );
 END;

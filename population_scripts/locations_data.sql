@@ -22,7 +22,7 @@ INSERT INTO locations.Region (RegionName, RegionDesc) VALUES
 ('Oceania', 'Adventure and wildlife, wine, and scenic coasts.'),
 ('Nordics & Arctic', 'Winter wonderlands, Aurora Borealis, and beautiful landscapes.');
 
-PRINT 'Filled out the Region LUT.';
+PRINT 'Populated the Region LUT.';
 
 /* =====================================
 =    Filling out the Country table     =
@@ -69,7 +69,7 @@ INSERT INTO locations.Country (CountryName, RegionId) VALUES
 ('Japan', 9),
 ('South Korea', 9);
 
-PRINT 'Filled out the Country LUT.'
+PRINT 'Populated the Country LUT.'
 
 /* =====================================
 =      Filling out the Area table      =
@@ -126,7 +126,7 @@ INSERT INTO locations.Area (CountryId, AreaName, AreaDesc) VALUES
 (20, 'Kyoto Prefecture', 'Cultural nexus of shrines and bamboo forests.'),
 (20, 'Hokkaido', 'Hot springs and powder snow ski fields.');
 
-PRINT 'Filled out the Area LUT.'
+PRINT 'Populated the Area LUT.'
 
 /* =====================================
 =     Filling out the Location table   =
@@ -185,4 +185,4 @@ INSERT INTO locations.Location (AreaId, LocationName, LocationDesc) VALUES
 -- ? Filled into Kyoto Prefecture, with ID 23
 (22, 'Arashiyama Bamboo Grove Area', 'Scenic hills surrounded by luxurious traditional Japanese Inns.');
 
-PRINT 'Filled out the Location LUT.';
+PRINT 'Populated the Location LUT.';

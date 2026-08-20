@@ -50,8 +50,8 @@ CREATE TABLE reviews.CriteriaRatings (
     /* Criterion and Associated review
     ===================================== */
 
-    CriterionId tinyint NOT NULL,
     ReviewId    bigint NOT NULL,
+    CriterionId tinyint NOT NULL,
 
     -- * The rating for the criterion for this review
     Rating      decimal(2, 1) NOT NULL,
@@ -60,11 +60,11 @@ CREATE TABLE reviews.CriteriaRatings (
     ===================================== */
 
     -- * Primary key constraint for the criterion and review IDs
-    CONSTRAINT PK_CriteriaRatings PRIMARY KEY (CriterionId, ReviewId),
+    CONSTRAINT PK_CriteriaRatings PRIMARY KEY (ReviewId, CriterionId),
 
     -- * Foreign key constraints for the criterion and review IDs
-    CONSTRAINT FK_CriteriaRating_Criterion FOREIGN KEY (CriterionId) REFERENCES reviews.ReviewCriteria (CriterionId),
     CONSTRAINT FK_CriteriaRating_Review FOREIGN KEY (ReviewId) REFERENCES reviews.PropertyReview (ReviewId),
+    CONSTRAINT FK_CriteriaRating_Criterion FOREIGN KEY (CriterionId) REFERENCES reviews.ReviewCriteria (CriterionId),
 
     -- * Validation and limiting of the rating
     CONSTRAINT CHK_Valid_CriterionRating CHECK (

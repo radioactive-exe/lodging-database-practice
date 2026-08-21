@@ -267,5 +267,23 @@ foreach ($FilePath in $DatabasePopulationFiles) {
     }
 }
 
-
 Write-Host "`n  /==========================================/`n / All done Populating the Airbnb Database. / `n/==========================================/  " -ForegroundColor Cyan -BackgroundColor DarkCyan
+
+# ? Create the packaged folder (if it doesn't exist) then compile the creation and population scripts into one file each
+# ? Also, assign to null to just silence any output
+
+$null = New-Item -Path "packaged" -ItemType Directory -Force
+
+Clear-Content -Path "packaged/database_creation.sql" -ErrorAction SilentlyContinue
+
+foreach ($file in $DatabaseCreationFiles) {
+    Get-Content -Path $file | Add-Content -Path "packaged/database_creation.sql"
+    "" | Add-Content -Path "packaged/database_creation.sql"
+}
+
+Clear-Content -Path "packaged/database_population.sql" -ErrorAction SilentlyContinue
+
+foreach ($file in $DatabasePopulationFiles) {
+    Get-Content -Path $file | Add-Content -Path "packaged/database_population.sql"
+    "" | Add-Content -Path "packaged/database_population.sql"
+}

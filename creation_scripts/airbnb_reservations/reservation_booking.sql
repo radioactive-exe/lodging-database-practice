@@ -61,7 +61,8 @@ CREATE TABLE reservations.PropertyBookings (
 
     -- * Foreign key constraints for the Property and Booker IDs
     CONSTRAINT FK_PropertyBooking_User FOREIGN KEY (BookerId) REFERENCES users.UserAccount (UserId),
-    CONSTRAINT FK_PropertyBooking_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId),
+    CONSTRAINT FK_PropertyBooking_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId)
+    ON UPDATE CASCADE,
 
     -- * Non-negative validations
     CONSTRAINT CHK_NonNegative_BasePriceNight CHECK (BasePricePerNight >= 0),

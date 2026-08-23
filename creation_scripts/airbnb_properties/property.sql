@@ -57,9 +57,12 @@ CREATE TABLE properties.Property (
     CONSTRAINT PK_PropertyId PRIMARY KEY CLUSTERED (PropertyId),
 
     -- * Foreign key constraints for the property location, type, and host
-    CONSTRAINT FK_Property_Location FOREIGN KEY (LocationId) REFERENCES locations.Location (LocationId),
-    CONSTRAINT FK_Property_Type FOREIGN KEY (PropertyTypeId) REFERENCES properties.PropertyType (TypeId),
-    CONSTRAINT FK_Property_Host FOREIGN KEY (HostId) REFERENCES users.UserAccount (UserId),
+    CONSTRAINT FK_Property_Location FOREIGN KEY (LocationId) REFERENCES locations.Location (LocationId)
+    ON UPDATE CASCADE,
+    CONSTRAINT FK_Property_Type FOREIGN KEY (PropertyTypeId) REFERENCES properties.PropertyType (TypeId)
+    ON UPDATE CASCADE,
+    CONSTRAINT FK_Property_Host FOREIGN KEY (HostId) REFERENCES users.UserAccount (UserId)
+    ON UPDATE CASCADE,
 
     -- * Nonnegative constraints on fees and prices
     CONSTRAINT CHK_NonNegative_Property_BasePriceNight CHECK (PerNightCost >= 0),

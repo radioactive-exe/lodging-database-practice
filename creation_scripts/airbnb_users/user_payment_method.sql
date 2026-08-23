@@ -50,9 +50,12 @@ CREATE TABLE users.PaymentMethod (
     -- * Foreign key constraint for the payment method type ID
     CONSTRAINT FK_PaymentMethod_MethodType FOREIGN KEY (MethodType) REFERENCES reservations.PaymentMethodType (TypeId),
     -- * Foreign key constraint for the payment method's associated billing address
-    CONSTRAINT FK_PaymentMethod_BillingAddress FOREIGN KEY (BillingAddress) REFERENCES users.BillingAddress (AddressId),
+    CONSTRAINT FK_PaymentMethod_BillingAddress FOREIGN KEY (BillingAddress) REFERENCES users.BillingAddress (AddressId)
+    ON UPDATE CASCADE,
     -- * Foreign key constraint for the user who saved/added the payment method
-    CONSTRAINT FK_PaymentMethod_User FOREIGN KEY (OwnerId) REFERENCES users.UserAccount (UserId),
+    CONSTRAINT FK_PaymentMethod_User FOREIGN KEY (OwnerId) REFERENCES users.UserAccount (UserId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
 
     -- * Constraint to validate the billing name for any payment type
     CONSTRAINT CHK_Valid_BillingName CHECK (dbo.FN_IsValidName(BillingName) = 1),

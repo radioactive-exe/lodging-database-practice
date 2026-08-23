@@ -15,7 +15,7 @@ CREATE TABLE reservations.Payments (
     -- * The booking this payment is connected with
     AssocBookingId   bigint NOT NULL,
     -- * The payment method used for this payment
-    PaymentMethodId  bigint NOT NULL,
+    PaymentMethodId  bigint DEFAULT (0) NOT NULL,
 
     /* Payment Classification
     ===================================== */
@@ -55,7 +55,8 @@ CREATE TABLE reservations.Payments (
     CONSTRAINT PK_Payments PRIMARY KEY CLUSTERED (PaymentId),
 
     -- ? The foreign key constraint for the associated booking
-    CONSTRAINT FK_Payments_AssociatedBooking FOREIGN KEY (AssocBookingId) REFERENCES reservations.PropertyBookings (BookingId),
+    CONSTRAINT FK_Payments_AssociatedBooking FOREIGN KEY (AssocBookingId) REFERENCES reservations.PropertyBookings (BookingId)
+    ON UPDATE CASCADE,
 
     -- ? The foreign key constraints for the payment classification (method, purpose, and status)
     CONSTRAINT FK_Payments_PaymentMethod FOREIGN KEY (PaymentMethodId) REFERENCES users.PaymentMethod (MethodId),

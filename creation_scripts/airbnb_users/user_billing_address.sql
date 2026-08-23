@@ -33,6 +33,7 @@ CREATE TABLE users.BillingAddress (
 
     -- * Foreign key constraint for the Country ID this Billing Address is in
     CONSTRAINT FK_BillingAddress_Country FOREIGN KEY (AddressCountry) REFERENCES locations.Country (CountryId)
+    ON UPDATE CASCADE
 );
 
 PRINT 'Created Billing Address table.';

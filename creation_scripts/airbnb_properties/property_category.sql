@@ -53,8 +53,12 @@ CREATE TABLE properties.AssignedPropertyCategories (
     CONSTRAINT PK_AssignedPropCat PRIMARY KEY CLUSTERED (PropertyId, CategoryId),
 
     -- * Foreign key constraints for both the property and category IDs
-    CONSTRAINT FK_AssignedPropCat_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId),
+    CONSTRAINT FK_AssignedPropCat_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
     CONSTRAINT FK_AssignedPropCat_Category FOREIGN KEY (CategoryId) REFERENCES properties.PropertyCategory (CategoryId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
 );
 
 PRINT 'Created Assigned Property-Category Relationship table.';

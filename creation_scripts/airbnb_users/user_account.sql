@@ -44,7 +44,8 @@ users.UserAccount (
     CONSTRAINT PK_UserId PRIMARY KEY CLUSTERED (UserId),
 
     -- * The Foreign Key Constraint for the user tier id
-    CONSTRAINT FK_UserAccount_UserTier FOREIGN KEY (UserTier) REFERENCES users.UserTier (TierId),
+    CONSTRAINT FK_UserAccount_UserTier FOREIGN KEY (UserTier) REFERENCES users.UserTier (TierId)
+    ON UPDATE CASCADE,
 
     -- ? Checks that the phone number is a valid international number
     CONSTRAINT CHK_Valid_PhoneNumber CHECK (dbo.FN_IsValidPhoneNumber(PhoneNumber) = 1),

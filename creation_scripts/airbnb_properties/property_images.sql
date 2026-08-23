@@ -29,7 +29,9 @@ CREATE TABLE properties.PropertyImages (
     CONSTRAINT PK_PropertyImage PRIMARY KEY CLUSTERED (ImageId),
 
     -- * Foreign key constraint for the property ID
-    CONSTRAINT FK_PropertyImage_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId),
+    CONSTRAINT FK_PropertyImage_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
 
     -- * A unique constraint on the property, url, and index columns
     -- ? This was not in the original plan, but this is now added to ensure

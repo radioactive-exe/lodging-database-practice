@@ -35,7 +35,8 @@ CREATE TABLE reviews.UserReview (
 
     -- ? Foreign key constraints for the property, reviewer, and booking IDs
     CONSTRAINT FK_UserReview_Target FOREIGN KEY (TargetId) REFERENCES users.UserAccount (UserId),
-    CONSTRAINT FK_UserReview_Reviewer FOREIGN KEY (ReviewerId) REFERENCES users.UserAccount (UserId),
+    CONSTRAINT FK_UserReview_Reviewer FOREIGN KEY (ReviewerId) REFERENCES users.UserAccount (UserId)
+    ON UPDATE CASCADE,
     CONSTRAINT FK_UserReview_Booking FOREIGN KEY (AssociatedBookingId) REFERENCES reservations.PropertyBookings (BookingId),
 
     -- ? Unique constraint for the booking-user-target trio, ensuring a user can't rate a host for a same booking twice (they can edit),

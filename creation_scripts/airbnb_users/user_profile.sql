@@ -46,7 +46,9 @@ users.UserProfile (
 
     -- * The internal User ID is both the primary and a foreign key
     CONSTRAINT PK_Profile_User PRIMARY KEY CLUSTERED (UserId),
-    CONSTRAINT FK_Profile_User FOREIGN KEY (UserId) REFERENCES users.UserAccount (UserId) ON DELETE CASCADE,
+    CONSTRAINT FK_Profile_User FOREIGN KEY (UserId) REFERENCES users.UserAccount (UserId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
 
     -- * Constraints to validate the URLs for the (1) profile pic. and (2) linked social media accounts
     -- * (1)

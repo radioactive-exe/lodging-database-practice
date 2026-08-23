@@ -63,8 +63,12 @@ CREATE TABLE reviews.CriteriaRatings (
     CONSTRAINT PK_CriteriaRatings PRIMARY KEY (ReviewId, CriterionId),
 
     -- * Foreign key constraints for the criterion and review IDs
-    CONSTRAINT FK_CriteriaRating_Review FOREIGN KEY (ReviewId) REFERENCES reviews.PropertyReview (ReviewId),
-    CONSTRAINT FK_CriteriaRating_Criterion FOREIGN KEY (CriterionId) REFERENCES reviews.ReviewCriteria (CriterionId),
+    CONSTRAINT FK_CriteriaRating_Review FOREIGN KEY (ReviewId) REFERENCES reviews.PropertyReview (ReviewId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+    CONSTRAINT FK_CriteriaRating_Criterion FOREIGN KEY (CriterionId) REFERENCES reviews.ReviewCriteria (CriterionId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
 
     -- * Validation and limiting of the rating
     CONSTRAINT CHK_Valid_CriterionRating CHECK (

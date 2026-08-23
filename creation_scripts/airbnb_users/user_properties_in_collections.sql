@@ -12,12 +12,12 @@ CREATE TABLE users.PropertiesInCollections (
     ===================================== */
 
     CollectionId bigint NOT NULL,
-    PropertyId   bigint NOT NULL,
+    PropertyId   bigint DEFAULT (0) NOT NULL,
 
     /* Added Info
     ===================================== */
 
-    AddedBy      bigint NOT NULL,
+    AddedBy      bigint DEFAULT (0) NOT NULL,
     AddedOn      datetime2 DEFAULT (SYSUTCDATETIME()) NOT NULL,
 
     /* Constraints
@@ -27,9 +27,12 @@ CREATE TABLE users.PropertiesInCollections (
     CONSTRAINT PK_PropertiesInUserCollections PRIMARY KEY CLUSTERED (CollectionId, AddedBy, PropertyId),
 
     -- * Foreign key constraints for the three main columns
-    CONSTRAINT FK_PropertyInCollection_Collection FOREIGN KEY (CollectionId) REFERENCES users.UserCollections (CollectionId),
+    CONSTRAINT FK_PropertyInCollection_Collection FOREIGN KEY (CollectionId) REFERENCES users.UserCollections (CollectionId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
     CONSTRAINT FK_PropertyInCollection_User FOREIGN KEY (AddedBy) REFERENCES users.UserAccount (UserId),
-    CONSTRAINT FK_PropertyInCollection_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId),
+    CONSTRAINT FK_PropertyInCollection_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId)
+    ON DELETE CASCADE
 );
 
 PRINT 'Created Assigned Property-Collection Relationship table.';

@@ -425,6 +425,7 @@ CREATE TABLE locations.Country (
 
     -- * Foreign key constraint for the Region ID this country belongs to
     CONSTRAINT FK_Country_Region FOREIGN KEY (RegionId) REFERENCES locations.Region (RegionId)
+    ON UPDATE CASCADE
 );
 
 PRINT 'Created Country table.';
@@ -457,6 +458,7 @@ CREATE TABLE locations.Area (
 
     -- * Foreign key constraint for the Country ID this area belongs to
     CONSTRAINT FK_Area_Country FOREIGN KEY (CountryId) REFERENCES locations.Country (CountryId)
+    ON UPDATE CASCADE
 );
 
 PRINT 'Created Area table.';
@@ -489,6 +491,7 @@ CREATE TABLE locations.Location (
 
     -- * Foreign key constraint for the Area ID this location belongs to
     CONSTRAINT FK_Location_Area FOREIGN KEY (AreaId) REFERENCES locations.Area (AreaId)
+    ON UPDATE CASCADE
 );
 
 PRINT 'Created Location table.';
@@ -635,7 +638,8 @@ users.UserAccount (
     CONSTRAINT PK_UserId PRIMARY KEY CLUSTERED (UserId),
 
     -- * The Foreign Key Constraint for the user tier id
-    CONSTRAINT FK_UserAccount_UserTier FOREIGN KEY (UserTier) REFERENCES users.UserTier (TierId),
+    CONSTRAINT FK_UserAccount_UserTier FOREIGN KEY (UserTier) REFERENCES users.UserTier (TierId)
+    ON UPDATE CASCADE,
 
     -- ? Checks that the phone number is a valid international number
     CONSTRAINT CHK_Valid_PhoneNumber CHECK (dbo.FN_IsValidPhoneNumber(PhoneNumber) = 1),
@@ -718,7 +722,9 @@ users.UserProfile (
 
     -- * The internal User ID is both the primary and a foreign key
     CONSTRAINT PK_Profile_User PRIMARY KEY CLUSTERED (UserId),
-    CONSTRAINT FK_Profile_User FOREIGN KEY (UserId) REFERENCES users.UserAccount (UserId) ON DELETE CASCADE,
+    CONSTRAINT FK_Profile_User FOREIGN KEY (UserId) REFERENCES users.UserAccount (UserId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
 
     -- * Constraints to validate the URLs for the (1) profile pic. and (2) linked social media accounts
     -- * (1)
@@ -808,8 +814,12 @@ CREATE TABLE users.UserLanguages (
     CONSTRAINT PK_UserLang PRIMARY KEY CLUSTERED (UserId, LangId),
 
     -- * The foreign key constraints for both IDs
-    CONSTRAINT FK_UserLang_User FOREIGN KEY (UserId) REFERENCES users.UserAccount (UserId),
-    CONSTRAINT FK_UserLang_Lang FOREIGN KEY (LangId) REFERENCES users.Languages (LangId),
+    CONSTRAINT FK_UserLang_User FOREIGN KEY (UserId) REFERENCES users.UserAccount (UserId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+    CONSTRAINT FK_UserLang_Lang FOREIGN KEY (LangId) REFERENCES users.Languages (LangId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
 
     -- * The Unique constraint that ensures each each user-language combination only occurs once
     CONSTRAINT UQ_User_Lang UNIQUE (UserId, LangId)
@@ -851,7 +861,9 @@ CREATE TABLE users.UserCollections (
     CONSTRAINT PK_CollectionId PRIMARY KEY CLUSTERED (CollectionId),
 
     -- * The foreign key constraint for the User/Creator ID of the collection
-    CONSTRAINT FK_Collection_User FOREIGN KEY (CreatorId) REFERENCES users.UserAccount (UserId),
+    CONSTRAINT FK_Collection_User FOREIGN KEY (CreatorId) REFERENCES users.UserAccount (UserId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
 
     -- * The Unique constraint that ensures each user has uniquely-named collections
     CONSTRAINT UQ_User_CollectionName UNIQUE (CreatorId, CollectionName)
@@ -937,6 +949,7 @@ CREATE TABLE users.BillingAddress (
 
     -- * Foreign key constraint for the Country ID this Billing Address is in
     CONSTRAINT FK_BillingAddress_Country FOREIGN KEY (AddressCountry) REFERENCES locations.Country (CountryId)
+    ON UPDATE CASCADE
 );
 
 PRINT 'Created Billing Address table.';
@@ -993,9 +1006,12 @@ CREATE TABLE users.PaymentMethod (
     -- * Foreign key constraint for the payment method type ID
     CONSTRAINT FK_PaymentMethod_MethodType FOREIGN KEY (MethodType) REFERENCES reservations.PaymentMethodType (TypeId),
     -- * Foreign key constraint for the payment method's associated billing address
-    CONSTRAINT FK_PaymentMethod_BillingAddress FOREIGN KEY (BillingAddress) REFERENCES users.BillingAddress (AddressId),
+    CONSTRAINT FK_PaymentMethod_BillingAddress FOREIGN KEY (BillingAddress) REFERENCES users.BillingAddress (AddressId)
+    ON UPDATE CASCADE,
     -- * Foreign key constraint for the user who saved/added the payment method
-    CONSTRAINT FK_PaymentMethod_User FOREIGN KEY (OwnerId) REFERENCES users.UserAccount (UserId),
+    CONSTRAINT FK_PaymentMethod_User FOREIGN KEY (OwnerId) REFERENCES users.UserAccount (UserId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
 
     -- * Constraint to validate the billing name for any payment type
     CONSTRAINT CHK_Valid_BillingName CHECK (dbo.FN_IsValidName(BillingName) = 1),
@@ -1294,9 +1310,12 @@ CREATE TABLE properties.Property (
     CONSTRAINT PK_PropertyId PRIMARY KEY CLUSTERED (PropertyId),
 
     -- * Foreign key constraints for the property location, type, and host
-    CONSTRAINT FK_Property_Location FOREIGN KEY (LocationId) REFERENCES locations.Location (LocationId),
-    CONSTRAINT FK_Property_Type FOREIGN KEY (PropertyTypeId) REFERENCES properties.PropertyType (TypeId),
-    CONSTRAINT FK_Property_Host FOREIGN KEY (HostId) REFERENCES users.UserAccount (UserId),
+    CONSTRAINT FK_Property_Location FOREIGN KEY (LocationId) REFERENCES locations.Location (LocationId)
+    ON UPDATE CASCADE,
+    CONSTRAINT FK_Property_Type FOREIGN KEY (PropertyTypeId) REFERENCES properties.PropertyType (TypeId)
+    ON UPDATE CASCADE,
+    CONSTRAINT FK_Property_Host FOREIGN KEY (HostId) REFERENCES users.UserAccount (UserId)
+    ON UPDATE CASCADE,
 
     -- * Nonnegative constraints on fees and prices
     CONSTRAINT CHK_NonNegative_Property_BasePriceNight CHECK (PerNightCost >= 0),
@@ -1337,7 +1356,9 @@ CREATE TABLE properties.PropertyImages (
     CONSTRAINT PK_PropertyImage PRIMARY KEY CLUSTERED (ImageId),
 
     -- * Foreign key constraint for the property ID
-    CONSTRAINT FK_PropertyImage_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId),
+    CONSTRAINT FK_PropertyImage_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
 
     -- * A unique constraint on the property, url, and index columns
     -- ? This was not in the original plan, but this is now added to ensure
@@ -1421,8 +1442,11 @@ CREATE TABLE properties.PropertySectors (
     CONSTRAINT PK_SectorId PRIMARY KEY CLUSTERED (SectorId),
 
     -- * Foreign key constraints for the sector type and containing property
-    CONSTRAINT FK_PropertySector_Type FOREIGN KEY (SectorTypeId) REFERENCES properties.SectorType (TypeId),
-    CONSTRAINT FK_PropertySector_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId),
+    CONSTRAINT FK_PropertySector_Type FOREIGN KEY (SectorTypeId) REFERENCES properties.SectorType (TypeId)
+    ON UPDATE CASCADE,
+    CONSTRAINT FK_PropertySector_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
 
     -- ? Ensuring that no sectors in the same property have the same name
     CONSTRAINT UQ_PropertySector_Name UNIQUE (PropertyId, SectorName),
@@ -1500,8 +1524,12 @@ CREATE TABLE properties.AssignedPropertyCategories (
     CONSTRAINT PK_AssignedPropCat PRIMARY KEY CLUSTERED (PropertyId, CategoryId),
 
     -- * Foreign key constraints for both the property and category IDs
-    CONSTRAINT FK_AssignedPropCat_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId),
+    CONSTRAINT FK_AssignedPropCat_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
     CONSTRAINT FK_AssignedPropCat_Category FOREIGN KEY (CategoryId) REFERENCES properties.PropertyCategory (CategoryId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
 );
 
 PRINT 'Created Assigned Property-Category Relationship table.';
@@ -1568,6 +1596,7 @@ CREATE TABLE properties.PropertyAttribute (
 
     -- * Foreign key constraint for the attribute type
     CONSTRAINT FK_PropertyAttribute_Type FOREIGN KEY (AttributeTypeId) REFERENCES properties.AttributeType (TypeId)
+    ON UPDATE CASCADE
 );
 
 PRINT 'Created Property Attribute LUT.';
@@ -1604,8 +1633,12 @@ CREATE TABLE properties.AssignedPropertyAttributes (
     CONSTRAINT PK_AssignedPropAttr PRIMARY KEY CLUSTERED (PropertyId, AttributeId),
 
     -- * Foreign key constraints for both the property and attribute IDs
-    CONSTRAINT FK_AssignedPropAttr_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId),
+    CONSTRAINT FK_AssignedPropAttr_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
     CONSTRAINT FK_AssignedPropAttr_Attribute FOREIGN KEY (AttributeId) REFERENCES properties.PropertyAttribute (AttributeId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
 );
 
 PRINT 'Created Assigned Property-Attribute Relationship table.';
@@ -1624,12 +1657,12 @@ CREATE TABLE users.PropertiesInCollections (
     ===================================== */
 
     CollectionId bigint NOT NULL,
-    PropertyId   bigint NOT NULL,
+    PropertyId   bigint DEFAULT (0) NOT NULL,
 
     /* Added Info
     ===================================== */
 
-    AddedBy      bigint NOT NULL,
+    AddedBy      bigint DEFAULT (0) NOT NULL,
     AddedOn      datetime2 DEFAULT (SYSUTCDATETIME()) NOT NULL,
 
     /* Constraints
@@ -1639,9 +1672,12 @@ CREATE TABLE users.PropertiesInCollections (
     CONSTRAINT PK_PropertiesInUserCollections PRIMARY KEY CLUSTERED (CollectionId, AddedBy, PropertyId),
 
     -- * Foreign key constraints for the three main columns
-    CONSTRAINT FK_PropertyInCollection_Collection FOREIGN KEY (CollectionId) REFERENCES users.UserCollections (CollectionId),
+    CONSTRAINT FK_PropertyInCollection_Collection FOREIGN KEY (CollectionId) REFERENCES users.UserCollections (CollectionId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
     CONSTRAINT FK_PropertyInCollection_User FOREIGN KEY (AddedBy) REFERENCES users.UserAccount (UserId),
-    CONSTRAINT FK_PropertyInCollection_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId),
+    CONSTRAINT FK_PropertyInCollection_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId)
+    ON DELETE CASCADE
 );
 
 PRINT 'Created Assigned Property-Collection Relationship table.';
@@ -1790,7 +1826,8 @@ CREATE TABLE reservations.PropertyBookings (
 
     -- * Foreign key constraints for the Property and Booker IDs
     CONSTRAINT FK_PropertyBooking_User FOREIGN KEY (BookerId) REFERENCES users.UserAccount (UserId),
-    CONSTRAINT FK_PropertyBooking_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId),
+    CONSTRAINT FK_PropertyBooking_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId)
+    ON UPDATE CASCADE,
 
     -- * Non-negative validations
     CONSTRAINT CHK_NonNegative_BasePriceNight CHECK (BasePricePerNight >= 0),
@@ -1938,8 +1975,11 @@ CREATE TABLE reservations.BookingGuests (
     CONSTRAINT PK_BookingGuests PRIMARY KEY CLUSTERED (BookingId, GuestTypeId),
 
     -- * Foreign key constraints for the booking ID and guest types
-    CONSTRAINT FK_BookingGuests_Booking FOREIGN KEY (BookingId) REFERENCES reservations.PropertyBookings (BookingId),
-    CONSTRAINT FK_BookingGuests_GuestType FOREIGN KEY (GuestTypeId) REFERENCES reservations.GuestType (TypeId),
+    CONSTRAINT FK_BookingGuests_Booking FOREIGN KEY (BookingId) REFERENCES reservations.PropertyBookings (BookingId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+    CONSTRAINT FK_BookingGuests_GuestType FOREIGN KEY (GuestTypeId) REFERENCES reservations.GuestType (TypeId)
+    ON UPDATE CASCADE,
 
     CONSTRAINT CHK_NonNegative_GuestQuantity CHECK (Quantity >= 0)
 );
@@ -1963,7 +2003,7 @@ CREATE TABLE reservations.Payments (
     -- * The booking this payment is connected with
     AssocBookingId   bigint NOT NULL,
     -- * The payment method used for this payment
-    PaymentMethodId  bigint NOT NULL,
+    PaymentMethodId  bigint DEFAULT (0) NOT NULL,
 
     /* Payment Classification
     ===================================== */
@@ -2003,7 +2043,8 @@ CREATE TABLE reservations.Payments (
     CONSTRAINT PK_Payments PRIMARY KEY CLUSTERED (PaymentId),
 
     -- ? The foreign key constraint for the associated booking
-    CONSTRAINT FK_Payments_AssociatedBooking FOREIGN KEY (AssocBookingId) REFERENCES reservations.PropertyBookings (BookingId),
+    CONSTRAINT FK_Payments_AssociatedBooking FOREIGN KEY (AssocBookingId) REFERENCES reservations.PropertyBookings (BookingId)
+    ON UPDATE CASCADE,
 
     -- ? The foreign key constraints for the payment classification (method, purpose, and status)
     CONSTRAINT FK_Payments_PaymentMethod FOREIGN KEY (PaymentMethodId) REFERENCES users.PaymentMethod (MethodId),
@@ -2235,7 +2276,8 @@ CREATE TABLE reviews.PropertyReview (
     CONSTRAINT PK_PropertyReviewId PRIMARY KEY CLUSTERED (ReviewId),
 
     -- ? Foreign key constraints for the reviewer and booking IDs
-    CONSTRAINT FK_PropertyReview_Booking FOREIGN KEY (AssociatedBookingId) REFERENCES reservations.PropertyBookings (BookingId),
+    CONSTRAINT FK_PropertyReview_Booking FOREIGN KEY (AssociatedBookingId) REFERENCES reservations.PropertyBookings (BookingId)
+    ON UPDATE CASCADE,
     CONSTRAINT FK_PropertyReview_Reviewer FOREIGN KEY (ReviewerId) REFERENCES users.UserAccount (UserId),
 
     -- ? Unique constraint for the booking-user-property trio, ensuring a user can't rate a property for a same booking twice (they can edit),
@@ -2310,8 +2352,12 @@ CREATE TABLE reviews.CriteriaRatings (
     CONSTRAINT PK_CriteriaRatings PRIMARY KEY (ReviewId, CriterionId),
 
     -- * Foreign key constraints for the criterion and review IDs
-    CONSTRAINT FK_CriteriaRating_Review FOREIGN KEY (ReviewId) REFERENCES reviews.PropertyReview (ReviewId),
-    CONSTRAINT FK_CriteriaRating_Criterion FOREIGN KEY (CriterionId) REFERENCES reviews.ReviewCriteria (CriterionId),
+    CONSTRAINT FK_CriteriaRating_Review FOREIGN KEY (ReviewId) REFERENCES reviews.PropertyReview (ReviewId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+    CONSTRAINT FK_CriteriaRating_Criterion FOREIGN KEY (CriterionId) REFERENCES reviews.ReviewCriteria (CriterionId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
 
     -- * Validation and limiting of the rating
     CONSTRAINT CHK_Valid_CriterionRating CHECK (
@@ -2432,7 +2478,8 @@ CREATE TABLE reviews.UserReview (
 
     -- ? Foreign key constraints for the property, reviewer, and booking IDs
     CONSTRAINT FK_UserReview_Target FOREIGN KEY (TargetId) REFERENCES users.UserAccount (UserId),
-    CONSTRAINT FK_UserReview_Reviewer FOREIGN KEY (ReviewerId) REFERENCES users.UserAccount (UserId),
+    CONSTRAINT FK_UserReview_Reviewer FOREIGN KEY (ReviewerId) REFERENCES users.UserAccount (UserId)
+    ON UPDATE CASCADE,
     CONSTRAINT FK_UserReview_Booking FOREIGN KEY (AssociatedBookingId) REFERENCES reservations.PropertyBookings (BookingId),
 
     -- ? Unique constraint for the booking-user-target trio, ensuring a user can't rate a host for a same booking twice (they can edit),

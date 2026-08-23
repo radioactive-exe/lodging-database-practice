@@ -32,7 +32,9 @@ CREATE TABLE users.UserCollections (
     CONSTRAINT PK_CollectionId PRIMARY KEY CLUSTERED (CollectionId),
 
     -- * The foreign key constraint for the User/Creator ID of the collection
-    CONSTRAINT FK_Collection_User FOREIGN KEY (CreatorId) REFERENCES users.UserAccount (UserId),
+    CONSTRAINT FK_Collection_User FOREIGN KEY (CreatorId) REFERENCES users.UserAccount (UserId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
 
     -- * The Unique constraint that ensures each user has uniquely-named collections
     CONSTRAINT UQ_User_CollectionName UNIQUE (CreatorId, CollectionName)

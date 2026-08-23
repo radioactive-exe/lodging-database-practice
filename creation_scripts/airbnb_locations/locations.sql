@@ -60,6 +60,7 @@ CREATE TABLE locations.Country (
 
     -- * Foreign key constraint for the Region ID this country belongs to
     CONSTRAINT FK_Country_Region FOREIGN KEY (RegionId) REFERENCES locations.Region (RegionId)
+    ON UPDATE CASCADE
 );
 
 PRINT 'Created Country table.';
@@ -92,6 +93,7 @@ CREATE TABLE locations.Area (
 
     -- * Foreign key constraint for the Country ID this area belongs to
     CONSTRAINT FK_Area_Country FOREIGN KEY (CountryId) REFERENCES locations.Country (CountryId)
+    ON UPDATE CASCADE
 );
 
 PRINT 'Created Area table.';
@@ -124,6 +126,7 @@ CREATE TABLE locations.Location (
 
     -- * Foreign key constraint for the Area ID this location belongs to
     CONSTRAINT FK_Location_Area FOREIGN KEY (AreaId) REFERENCES locations.Area (AreaId)
+    ON UPDATE CASCADE
 );
 
 PRINT 'Created Location table.';

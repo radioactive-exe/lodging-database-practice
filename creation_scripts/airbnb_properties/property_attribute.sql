@@ -60,6 +60,7 @@ CREATE TABLE properties.PropertyAttribute (
 
     -- * Foreign key constraint for the attribute type
     CONSTRAINT FK_PropertyAttribute_Type FOREIGN KEY (AttributeTypeId) REFERENCES properties.AttributeType (TypeId)
+    ON UPDATE CASCADE
 );
 
 PRINT 'Created Property Attribute LUT.';
@@ -96,8 +97,12 @@ CREATE TABLE properties.AssignedPropertyAttributes (
     CONSTRAINT PK_AssignedPropAttr PRIMARY KEY CLUSTERED (PropertyId, AttributeId),
 
     -- * Foreign key constraints for both the property and attribute IDs
-    CONSTRAINT FK_AssignedPropAttr_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId),
+    CONSTRAINT FK_AssignedPropAttr_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
     CONSTRAINT FK_AssignedPropAttr_Attribute FOREIGN KEY (AttributeId) REFERENCES properties.PropertyAttribute (AttributeId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
 );
 
 PRINT 'Created Assigned Property-Attribute Relationship table.';

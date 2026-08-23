@@ -54,8 +54,11 @@ CREATE TABLE reservations.BookingGuests (
     CONSTRAINT PK_BookingGuests PRIMARY KEY CLUSTERED (BookingId, GuestTypeId),
 
     -- * Foreign key constraints for the booking ID and guest types
-    CONSTRAINT FK_BookingGuests_Booking FOREIGN KEY (BookingId) REFERENCES reservations.PropertyBookings (BookingId),
-    CONSTRAINT FK_BookingGuests_GuestType FOREIGN KEY (GuestTypeId) REFERENCES reservations.GuestType (TypeId),
+    CONSTRAINT FK_BookingGuests_Booking FOREIGN KEY (BookingId) REFERENCES reservations.PropertyBookings (BookingId)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+    CONSTRAINT FK_BookingGuests_GuestType FOREIGN KEY (GuestTypeId) REFERENCES reservations.GuestType (TypeId)
+    ON UPDATE CASCADE,
 
     CONSTRAINT CHK_NonNegative_GuestQuantity CHECK (Quantity >= 0)
 );

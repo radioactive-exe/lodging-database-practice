@@ -506,7 +506,7 @@ INSERT INTO
 properties.SectorType (TypeName, TypeDescription)
 VALUES
 
-/* These are 8 different sector types
+/* These are 11 different sector types
 ===================================== */
 
 (

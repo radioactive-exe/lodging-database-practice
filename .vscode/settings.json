@@ -20,5 +20,11 @@
         "editor.selectionBackground": "#C792EA22",
         "editorBracketHighlight.foreground1": "#C792EA",
         "editorBracketHighlight.foreground2": "#D8A7FF"
-    }
+    },
+    "VSCodeCounter.exclude": [
+        "**/.gitignore",
+        "**/.vscode/**",
+        "**/node_modules/**",
+        "scripting/**"
+    ]
 }

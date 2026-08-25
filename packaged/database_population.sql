@@ -38,7 +38,7 @@ INSERT INTO locations.Country (CountryName, RegionId) VALUES
 -- ? Filled into the Mediterranean, with IDs from 4 to 7
 ('Greece', 2),
 ('Italy', 2),
-('Lebanon', 2),
+('Spain', 2),
 ('Egypt', 2),
 
 -- ? Filled into Southeast Asia, with IDs from 8 to 10
@@ -186,6 +186,8 @@ INSERT INTO locations.Location (AreaId, LocationName, LocationDesc) VALUES
 (22, 'Arashiyama Bamboo Grove Area', 'Scenic hills surrounded by luxurious traditional Japanese Inns.');
 
 PRINT 'Populated the Location LUT.';
+
+GO
 
 -- ? Unneeded response of rows affected
 SET
@@ -860,6 +862,8 @@ VALUES
 (25, 5);
 
 PRINT 'Populated Assigned User-Languages relationship table.';
+
+GO
 
 -- ? Unneeded response of rows affected
 SET
@@ -1739,6 +1743,8 @@ VALUES
 
 PRINT 'Populated User Payment Method table.';
 
+GO
+
 -- ? Unneeded response of rows affected -- noqa: LT05
 SET
     NOCOUNT ON;
@@ -2247,7 +2253,7 @@ INSERT INTO
 properties.SectorType (TypeName, TypeDescription)
 VALUES
 
-/* These are 8 different sector types
+/* These are 11 different sector types
 ===================================== */
 
 (
@@ -3715,6 +3721,8 @@ VALUES
 
 PRINT 'Populated Assigned Property-Attribute relationship table.';
 
+GO
+
 -- ? Unneeded response of rows affected -- noqa: LT05
 SET
     NOCOUNT ON;
@@ -4506,6 +4514,8 @@ VALUES
 (125, 25, 15);
 
 PRINT 'Populated the Properties-In-Collections relationship table.';
+
+GO
 
 /* =====================================
 =  Filling out the booking status LUT  =
@@ -7214,6 +7224,8 @@ VALUES
 
 PRINT 'Populated Payments table.';
 
+GO
+
 /* ======================================
 =  Filling out the review criteria LUT  =
 ====================================== */
@@ -9054,4 +9066,6 @@ VALUES
 );
 
 PRINT 'Populated User Review table.';
+
+GO
 

@@ -38,7 +38,7 @@ INSERT INTO locations.Country (CountryName, RegionId) VALUES
 -- ? Filled into the Mediterranean, with IDs from 4 to 7
 ('Greece', 2),
 ('Italy', 2),
-('Lebanon', 2),
+('Spain', 2),
 ('Egypt', 2),
 
 -- ? Filled into Southeast Asia, with IDs from 8 to 10

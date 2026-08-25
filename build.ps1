@@ -186,104 +186,92 @@ $DatabasePopulationFiles = @(
     "population_scripts/review_data.sql"
 )
 
-Write-Host "`nBuilding Functions, Schemas, and tables..." -ForegroundColor Green
-
-# ? Cycle through the files
-foreach ($FilePath in $DatabaseCreationFiles) {
-    # * The full absolute path of the file of the current iteration/index
-    $FullPath = Join-Path -Path $PSScriptRoot -ChildPath $FilePath
-
-    # ? If the file exists where it's supposed to
-    if (Test-Path $FullPath) {
-        Write-Host "`nRunning creation file: $FilePath" -ForegroundColor Cyan
-        try {
-            # ? Invoke the file, and store all the PRINT's in the first stream
-            $SqlPrints = Invoke-Sqlcmd @SqlArgs -InputFile $FullPath -Verbose 4>&1
-
-            # ? If there are prints, cycle through them and then print them out in the Powershell window this is running in
-            if ($SqlPrints) {
-                foreach ($Message in $SqlPrints) {
-                    $Colour = 'Gray'
-
-                    if ($Message -like '*function.') { $Colour = 'Green' }
-                    elseif ($Message -like '*LUT.') { $Colour = 'Blue' }
-                    elseif ($Message -like '*trigger.') { $Colour = 'Yellow' }
-                    elseif ($Message -like '*relationship table.') { $Colour = 'DarkMagenta' }
-
-                    Write-Host "   -> $($Message.ToString())" -ForegroundColor $Colour
-                }
-            }
-        }
-        catch {
-            Write-Host "`nError in: $FilePath.`nReason: $(($_ -split 'Msg')[0].Trim())" -ForegroundColor Red
-            break
-        }
-    }
-    else {
-        Write-Host "File not found: $FilePath" -ForegroundColor Red
-        break
-    }
-}
-
-
-Write-Host "`n  /========================================/`n / All done building the Airbnb Database. / `n/========================================/  " -ForegroundColor Cyan -BackgroundColor DarkCyan
-
-Write-Host "`nPopulating tables..." -ForegroundColor Green
-
-# ? Cycle through the files
-foreach ($FilePath in $DatabasePopulationFiles) {
-    # * The full absolute path of the file of the current iteration/index
-    $FullPath = Join-Path -Path $PSScriptRoot -ChildPath $FilePath
-
-    # ? If the file exists where it's supposed to
-    if (Test-Path $FullPath) {
-        Write-Host "`nRunning population file: $FilePath" -ForegroundColor Cyan
-        try {
-            # ? Invoke the file, and store all the PRINT's in the first stream
-            $SqlPrints = Invoke-Sqlcmd @SqlArgs -InputFile $FullPath -Verbose 4>&1
-
-            # ? If there are prints, cycle through them and then print them out in the Powershell window this is running in
-            if ($SqlPrints) {
-                foreach ($Message in $SqlPrints) {
-                    $Colour = 'Gray'
-
-                    if ($Message -like '*function.') { $Colour = 'Green' }
-                    elseif ($Message -like '*LUT.') { $Colour = 'Blue' }
-                    elseif ($Message -like '*trigger.') { $Colour = 'Yellow' }
-                    elseif ($Message -like '*relationship table.') { $Colour = 'DarkMagenta' }
-
-                    Write-Host "   -> $($Message.ToString())" -ForegroundColor $Colour
-                }
-            }
-        }
-        catch {
-            Write-Host "`nError in: $FilePath.`nReason: $(($_ -split 'Msg')[0].Trim())" -ForegroundColor Red
-            break
-        }
-    }
-    else {
-        Write-Host "File not found: $FilePath" -ForegroundColor Red
-        break
-    }
-}
-
-Write-Host "`n  /==========================================/`n / All done Populating the Airbnb Database. / `n/==========================================/  " -ForegroundColor Cyan -BackgroundColor DarkCyan
+Write-Host "`nCompiling creation, population, and testing scripts..." -ForegroundColor Green
 
 # ? Create the packaged folder (if it doesn't exist) then compile the creation and population scripts into one file each
 # ? Also, assign to null to just silence any output
 
 $null = New-Item -Path "packaged" -ItemType Directory -Force
 
+# ? Clear the file of its current contents (if any)
 Clear-Content -Path "packaged/database_creation.sql" -ErrorAction SilentlyContinue
 
+# ? Cycle through the files
 foreach ($file in $DatabaseCreationFiles) {
+    # ? And compile them into one file with a GO batch delimiter and a blank line between them
     Get-Content -Path $file | Add-Content -Path "packaged/database_creation.sql"
-    "" | Add-Content -Path "packaged/database_creation.sql"
+    "`nGO`n" | Add-Content -Path "packaged/database_creation.sql"
 }
 
+# ? Clear the file of its current contents (if any)
 Clear-Content -Path "packaged/database_population.sql" -ErrorAction SilentlyContinue
 
+# ? Cycle through the files
 foreach ($file in $DatabasePopulationFiles) {
+    # ? And compile them into one file with a GO batch delimiter and a blank line between them
     Get-Content -Path $file | Add-Content -Path "packaged/database_population.sql"
-    "" | Add-Content -Path "packaged/database_population.sql"
+    "`nGO`n" | Add-Content -Path "packaged/database_population.sql"
+}
+
+
+$PackagedFiles = @(
+    "packaged/database_creation.sql",
+    "packaged/database_population.sql"
+)
+
+foreach ($FilePath in $PackagedFiles) {
+    # * The full absolute path of the file of the current iteration/index
+    $FullPath = Join-Path -Path $PSScriptRoot -ChildPath $FilePath
+
+    # ? Get and store a flag that represents which file we are running right now (creation or population)
+    $WhichFileFlag = 0
+    if ($FilePath -like '*creation*') { $WhichFileFlag = 1 }
+    elseif ($FilePath -like '*population*') { $WhichFileFlag = 2 }
+
+    # ? Based on which file we are running, populate the correct message
+    $MessageToPrint = 'Running an odd extra file'
+    if ($WhichFileFlag -eq 1) { $MessageToPrint = 'Building Functions, Schemas, and tables...' }
+    elseif ($WhichFileFlag -eq 2) { $MessageToPrint = 'Populating tables...' }
+
+    # ? Then write it
+    Write-Host "`n$MessageToPrint" -ForegroundColor Green
+
+    # ? If the file exists where it's supposed to
+    if (Test-Path $FullPath) {
+        Write-Host "`nRunning file: $FilePath" -ForegroundColor Cyan
+        try {
+            # ? Invoke the file, and store all the PRINT's in the first stream
+            $SqlPrints = Invoke-Sqlcmd @SqlArgs -InputFile $FullPath -Verbose 4>&1
+
+            # ? If there are prints, cycle through them and then print them out in the Powershell window this is running in
+            if ($SqlPrints) {
+                foreach ($Message in $SqlPrints) {
+                    $Colour = 'Gray'
+
+                    if ($Message -like '*function.') { $Colour = 'Green' }
+                    elseif ($Message -like '*Schema.') { $Colour = 'DarkYellow' }
+                    elseif ($Message -like '*LUT.') { $Colour = 'Blue' }
+                    elseif ($Message -like '*trigger.') { $Colour = 'Yellow' }
+                    elseif ($Message -like '*relationship table.') { $Colour = 'DarkMagenta' }
+
+                    Write-Host "   -> $($Message.ToString())" -ForegroundColor $Colour
+                }
+            }
+        }
+        catch {
+            Write-Host "`nError in: $FilePath.`nReason: $(($_ -split 'Msg')[0].Trim())" -ForegroundColor Red
+            break
+        }
+
+        if ($WhichFileFlag -eq 1) {
+            Write-Host "`n  /========================================/`n / All done building the Airbnb Database. / `n/========================================/  " -ForegroundColor Cyan -BackgroundColor DarkCyan
+        }
+        elseif ($WhichFileFlag -eq 2) {
+            Write-Host "`n  /==========================================/`n / All done Populating the Airbnb Database. / `n/==========================================/  " -ForegroundColor Cyan -BackgroundColor DarkCyan
+        }
+    }
+    else {
+        Write-Host "File not found: $FilePath" -ForegroundColor Red
+        break
+    }
 }

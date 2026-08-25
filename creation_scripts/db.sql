@@ -20,8 +20,6 @@ GO
 -- ? And then recreate it from scratch
 CREATE DATABASE Airbnb;
 
-GO
-
 /**
 *
 * TODO:

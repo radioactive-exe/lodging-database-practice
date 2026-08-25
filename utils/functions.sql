@@ -296,8 +296,6 @@ GO
 
 PRINT 'Created identification number validation function.';
 
-GO
-
 /* =====================================
 =     Calculators & other Utilities    =
 ===================================== */

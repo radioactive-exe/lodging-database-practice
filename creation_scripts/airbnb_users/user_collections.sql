@@ -83,4 +83,3 @@ BEGIN
     FROM inserted
     ORDER BY inserted.UserId ASC;
 END;
-GO

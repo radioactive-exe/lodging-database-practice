@@ -122,7 +122,7 @@ BEGIN
                 ), 0.00
             )
         -- ? Get all criterion ratings (1/3)
-        FROM properties.CriteriaRatings AS Ratings
+        FROM reviews.CriteriaRatings AS Ratings
         -- ? And all their weights (2/3)
         INNER JOIN reviews.ReviewCriteria AS Criteria
             ON Ratings.CriterionId = Criteria.CriterionId

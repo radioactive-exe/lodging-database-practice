@@ -296,11 +296,11 @@ GO
 
 PRINT 'Created identification number validation function.';
 
-GO
-
 /* =====================================
 =     Calculators & other Utilities    =
 ===================================== */
+
+GO
 
 /**
 *
@@ -362,6 +362,8 @@ IF NOT EXISTS (
 )EXEC ('CREATE SCHEMA reservations;');
 
 PRINT 'Created Reservations Schema.';
+
+GO
 
 /**
 *
@@ -496,6 +498,8 @@ CREATE TABLE locations.Location (
 
 PRINT 'Created Location table.';
 
+GO
+
 /**
 *
 * The creation script for the Payment Method Type table
@@ -522,6 +526,8 @@ CREATE TABLE reservations.PaymentMethodType (
 );
 
 PRINT 'Created Payment Method Type LUT.';
+
+GO
 
 /**
 *
@@ -591,6 +597,8 @@ users.UserTier (
 );
 
 PRINT 'Created the User Tier LUT.';
+
+GO
 
 /**
 *
@@ -673,6 +681,8 @@ END;
 GO
 
 PRINT 'Created User Account `ModifiedAt` updating trigger.';
+
+GO
 
 /**
 *
@@ -763,6 +773,8 @@ GO
 
 PRINT 'Created User Profile `ModifiedAt` updating trigger.';
 
+GO
+
 /**
 *
 * The creation script for the Languages table
@@ -826,6 +838,8 @@ CREATE TABLE users.UserLanguages (
 );
 
 PRINT 'Created User-Language Relationship table.';
+
+GO
 
 /**
 *
@@ -912,6 +926,7 @@ BEGIN
     FROM inserted
     ORDER BY inserted.UserId ASC;
 END;
+
 GO
 
 /**
@@ -953,6 +968,8 @@ CREATE TABLE users.BillingAddress (
 );
 
 PRINT 'Created Billing Address table.';
+
+GO
 
 /**
 *
@@ -1224,6 +1241,8 @@ GO
 
 PRINT 'Created Card Date Validation trigger.';
 
+GO
+
 /**
 *
 * The creation script for the Property type table
@@ -1250,6 +1269,8 @@ CREATE TABLE properties.PropertyType (
 );
 
 PRINT 'Created Property Type LUT.';
+
+GO
 
 /**
 *
@@ -1325,6 +1346,8 @@ CREATE TABLE properties.Property (
 
 PRINT 'Created Property table.';
 
+GO
+
 /**
 *
 * The creation script for the Property Images table
@@ -1367,6 +1390,8 @@ CREATE TABLE properties.PropertyImages (
 );
 
 PRINT 'Created Property Images table.';
+
+GO
 
 /**
 *
@@ -1469,6 +1494,8 @@ CREATE TABLE properties.PropertySectors (
 
 PRINT 'Created Property-Sector Relationship table.';
 
+GO
+
 /**
 *
 * The creation script for the Property category table
@@ -1533,6 +1560,8 @@ CREATE TABLE properties.AssignedPropertyCategories (
 );
 
 PRINT 'Created Assigned Property-Category Relationship table.';
+
+GO
 
 /**
 *
@@ -1643,6 +1672,8 @@ CREATE TABLE properties.AssignedPropertyAttributes (
 
 PRINT 'Created Assigned Property-Attribute Relationship table.';
 
+GO
+
 /**
 *
 * The creation script for the User Collection Properties table
@@ -1682,6 +1713,8 @@ CREATE TABLE users.PropertiesInCollections (
 
 PRINT 'Created Assigned Property-Collection Relationship table.';
 
+GO
+
 /**
 *
 * The creation script for the Booking status table
@@ -1708,6 +1741,8 @@ CREATE TABLE reservations.BookingStatus (
 );
 
 PRINT 'Created Booking Status LUT.';
+
+GO
 
 /**
 *
@@ -1736,6 +1771,8 @@ CREATE TABLE reservations.PaymentStatus (
 
 PRINT 'Created Payment Status LUT.';
 
+GO
+
 /**
 *
 * The creation script for the Payment purpose table
@@ -1762,6 +1799,8 @@ CREATE TABLE reservations.PaymentPurpose (
 );
 
 PRINT 'Created Payment Purpose LUT.';
+
+GO
 
 /**
 *
@@ -1919,6 +1958,8 @@ GO
 
 PRINT 'Created Booking Price Info population function.';
 
+GO
+
 /**
 *
 * The creation script for the Guest type table
@@ -1985,6 +2026,8 @@ CREATE TABLE reservations.BookingGuests (
 );
 
 PRINT 'Created Booking-Guests Relationship table.';
+
+GO
 
 /**
 *
@@ -2222,6 +2265,8 @@ GO
 
 PRINT 'Created Booking Payment `AmountRemaining` population function.';
 
+GO
+
 /**
 *
 * The creation script for the Property Review table
@@ -2286,6 +2331,8 @@ CREATE TABLE reviews.PropertyReview (
 );
 
 PRINT 'Created Property Review (without Total Rating) table.';
+
+GO
 
 /**
 *
@@ -2411,7 +2458,7 @@ BEGIN
                 ), 0.00
             )
         -- ? Get all criterion ratings (1/3)
-        FROM properties.CriteriaRatings AS Ratings
+        FROM reviews.CriteriaRatings AS Ratings
         -- ? And all their weights (2/3)
         INNER JOIN reviews.ReviewCriteria AS Criteria
             ON Ratings.CriterionId = Criteria.CriterionId
@@ -2440,6 +2487,8 @@ TotalRating AS reviews.FN_TotalPropertyReviewRating(ReviewId);
 GO
 
 PRINT 'Added Computed Total Property Review Rating column.';
+
+GO
 
 /**
 *
@@ -2501,4 +2550,6 @@ CREATE TABLE reviews.UserReview (
 );
 
 PRINT 'Created User Review table.';
+
+GO
 

@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the Review criteria table
-*
-*/
+/* =====================================
+=         Review Criteria LUT          =
+===================================== */
 
 DROP TABLE IF EXISTS reviews.ReviewCriteria;
 
@@ -37,11 +35,9 @@ PRINT 'Created Review Criteria LUT.';
 
 GO
 
-/**
-*
-* The creation script for the Criteria Rating relationship table
-*
-*/
+/* ======================================
+=  Criteria Ratings relationship table  =
+====================================== */
 
 DROP TABLE IF EXISTS reviews.CriteriaRatings;
 
@@ -89,12 +85,14 @@ GO
 -- ! as it is used in a computed column in that table, but requires these two. That is why it is not in
 -- ! the main functions.sql file
 
-/**
-*
-* This function gathers a total weighted rating for a property based on an associated booking and all
-* the reviewed criteria associated with the booking's review
-*
-*/
+/* ==================================================
+= Total Property Review Rating calculation function =
+================================================== */
+
+-- ? This function gathers a total weighted rating for a property based on an
+-- ? associated booking and all the reviewed criteria associated with the booking's
+-- ? review
+
 CREATE
 OR ALTER
 FUNCTION reviews.FN_TotalPropertyReviewRating(@ReviewId bigint) RETURNS decimal(3, 2)

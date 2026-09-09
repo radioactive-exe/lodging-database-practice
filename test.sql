@@ -10,4 +10,5 @@
 -- FROM reservations.Payments INNER JOIN reservations.PropertyBookings ON Payments.AssocBookingId = PropertyBookings.BookingId INNER JOIN reservations.PaymentPurpose ON Payments.PaymentPurposeId = PaymentPurpose.PurposeId
 -- ORDER BY PropertyBookings.BookingId, Payments.PaidOn ASC;
 
-SELECT * FROM reservations.PropertyBookings;
+SELECT
+    * FROM reviews.PropertyReview WHERE TotalRating > 0

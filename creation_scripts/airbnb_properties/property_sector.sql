@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the Sector type table
-*
-*/
+/* =====================================
+=      Property Sector Type table      =
+===================================== */
 
 DROP TABLE IF EXISTS properties.SectorType;
 
@@ -27,11 +25,9 @@ PRINT 'Created Sector Type LUT.';
 
 GO
 
-/**
-*
-* The creation script for the Property Sectors relationship table
-*
-*/
+/* =====================================
+=        Property Sectors table        =
+===================================== */
 
 DROP TABLE IF EXISTS properties.PropertySectors;
 

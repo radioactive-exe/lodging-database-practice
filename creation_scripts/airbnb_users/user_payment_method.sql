@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the users' Payment Methods table
-*
-*/
+/* =====================================
+=        User Payment Method LUT       =
+===================================== */
 
 DROP TABLE IF EXISTS users.PaymentMethod;
 
@@ -73,7 +71,7 @@ CREATE TABLE users.PaymentMethod (
     -- * Validates if the method is a card, or skips
     CONSTRAINT CHK_Valid_CardPaymentMethod CHECK (
         -- ? If the method is not a card, skip
-        MethodType != 1
+        MethodType <> 1
         -- ? Otherwise, check card fields
         OR (
             -- ? Checking the card number
@@ -99,7 +97,7 @@ CREATE TABLE users.PaymentMethod (
     -- * Validates if the method is a digital wallet, or skips
     CONSTRAINT CHK_Valid_DigitalWalletPaymentMethod CHECK (
         -- ? If the method is not a card, skip
-        MethodType != 2
+        MethodType <> 2
         -- ? Otherwise, check digital wallet fields
         OR (
             -- ? Checks the full merchant/payment token (Letters, numbers, underscores, hyphens),
@@ -123,7 +121,7 @@ CREATE TABLE users.PaymentMethod (
     -- * Validates if the method is Paypal/Venmo, or skips
     CONSTRAINT CHK_Valid_PayPalVenmoPaymentMethod CHECK (
         -- ? If the method is not Paypal/Venmo, skip
-        MethodType != 3
+        MethodType <> 3
         OR (
             (
             -- ? If it is PayPal, Field1 is the payer ID or a vault ID
@@ -148,7 +146,7 @@ CREATE TABLE users.PaymentMethod (
     -- * Validates if the method is a BNPL method, or skips
     CONSTRAINT CHK_Valid_BNPLPaymentMethod CHECK (
         -- ? If the method is not a BNPL system, skip
-        MethodType != 4
+        MethodType <> 4
         OR (
             -- ? Check the stored/saved token, usually between 30-60 characters with numbers, letters,
             -- ? hyphens, underscores, and sometimes slashes. Length limits are with padding
@@ -169,7 +167,7 @@ CREATE TABLE users.PaymentMethod (
     -- * Validates if the method is a Bank account, or skips
     CONSTRAINT CHK_Valid_BankPaymentMethod CHECK (
         -- ? If the method is not a Bank account/transfer location, skip
-        MethodType != 5
+        MethodType <> 5
         OR (
             -- ! NOTE: While there are many other bank transfer types in the real world,
             -- ! I will keep this Bank transfer to a simple IBAN system. Otherwise, there
@@ -194,11 +192,9 @@ PRINT 'Created the Payment Methods table.';
 
 GO
 
-/**
-*
-* The creation script for the card date validation trigger
-*
-*/
+/* =====================================
+=       Card Validation trigger        =
+===================================== */
 
 CREATE TRIGGER users.TR_PaymentMethod_ValidateCardExpiryDate
 ON users.PaymentMethod

@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the Property type table
-*
-*/
+/* =====================================
+=         Property Type table          =
+===================================== */
 
 DROP TABLE IF EXISTS properties.PropertyType;
 

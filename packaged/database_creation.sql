@@ -631,7 +631,17 @@ users.UserAccount (
 
     /* Dates and Tracking
     ===================================== */
+    -- * The user's country of residence
 
+    -- ! This was originally not in the plan, but as I was writing the test case
+    -- ! regarding checking cross-country bookings, I realised that there is no way
+    -- ! to reliably determine a user's country of origin/residence given the current
+    -- ! implementation. You have to join across the billing address table and then the
+    -- ! payment methods table to get the country of the user, inflating joins and also
+    -- ! being problematic with the fact that users can have multiple billing addresses
+    -- ! and payment methods, without a single "primary" one to derive a user's
+    -- ! potential address from.
+    UserCountry    smallint NOT NULL,
     -- * Can be null, as the user may have never hosted
     HostingSince   date,
     -- * Creation and Updating dates are automatically populated
@@ -645,9 +655,10 @@ users.UserAccount (
     -- * The Primary Key Constraint for the user account
     CONSTRAINT PK_UserId PRIMARY KEY CLUSTERED (UserId),
 
-    -- * The Foreign Key Constraint for the user tier id
+    -- * The Foreign Key Constraint for the user tier id and user Country
     CONSTRAINT FK_UserAccount_UserTier FOREIGN KEY (UserTier) REFERENCES users.UserTier (TierId)
     ON UPDATE CASCADE,
+    CONSTRAINT FK_UserAccount_Country FOREIGN KEY (UserCountry) REFERENCES locations.Country (CountryId),
 
     -- ? Checks that the phone number is a valid international number
     CONSTRAINT CHK_Valid_PhoneNumber CHECK (dbo.FN_IsValidPhoneNumber(PhoneNumber) = 1),
@@ -1046,7 +1057,7 @@ CREATE TABLE users.PaymentMethod (
     -- * Validates if the method is a card, or skips
     CONSTRAINT CHK_Valid_CardPaymentMethod CHECK (
         -- ? If the method is not a card, skip
-        MethodType != 1
+        MethodType <> 1
         -- ? Otherwise, check card fields
         OR (
             -- ? Checking the card number
@@ -1072,7 +1083,7 @@ CREATE TABLE users.PaymentMethod (
     -- * Validates if the method is a digital wallet, or skips
     CONSTRAINT CHK_Valid_DigitalWalletPaymentMethod CHECK (
         -- ? If the method is not a card, skip
-        MethodType != 2
+        MethodType <> 2
         -- ? Otherwise, check digital wallet fields
         OR (
             -- ? Checks the full merchant/payment token (Letters, numbers, underscores, hyphens),
@@ -1096,7 +1107,7 @@ CREATE TABLE users.PaymentMethod (
     -- * Validates if the method is Paypal/Venmo, or skips
     CONSTRAINT CHK_Valid_PayPalVenmoPaymentMethod CHECK (
         -- ? If the method is not Paypal/Venmo, skip
-        MethodType != 3
+        MethodType <> 3
         OR (
             (
             -- ? If it is PayPal, Field1 is the payer ID or a vault ID
@@ -1121,7 +1132,7 @@ CREATE TABLE users.PaymentMethod (
     -- * Validates if the method is a BNPL method, or skips
     CONSTRAINT CHK_Valid_BNPLPaymentMethod CHECK (
         -- ? If the method is not a BNPL system, skip
-        MethodType != 4
+        MethodType <> 4
         OR (
             -- ? Check the stored/saved token, usually between 30-60 characters with numbers, letters,
             -- ? hyphens, underscores, and sometimes slashes. Length limits are with padding
@@ -1142,7 +1153,7 @@ CREATE TABLE users.PaymentMethod (
     -- * Validates if the method is a Bank account, or skips
     CONSTRAINT CHK_Valid_BankPaymentMethod CHECK (
         -- ? If the method is not a Bank account/transfer location, skip
-        MethodType != 5
+        MethodType <> 5
         OR (
             -- ! NOTE: While there are many other bank transfer types in the real world,
             -- ! I will keep this Bank transfer to a simple IBAN system. Otherwise, there
@@ -1345,6 +1356,55 @@ CREATE TABLE properties.Property (
 );
 
 PRINT 'Created Property table.';
+
+GO
+
+CREATE TRIGGER properties.TR_Property_ValidateHostTier
+ON properties.Property
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    -- ? Unneeded response of rows affected
+    SET NOCOUNT ON;
+
+    -- ? Update the host's tier to the host counterpart one level lower than their
+    -- ! current tier, to a minimum of the standard host tier. This is to account for
+    -- ! the host-related milestones that the user has yet to achieve, but still does
+    -- ! not completely disregard their loyalty to the platform as a customer.
+    -- ? This update happens if and only if a row is returned from this query.
+    -- ? This assignment is also one line because we are copying the value from one
+    -- ? column into another based on the filtering at the end of this query
+    -- ? Additionally, populate their HostingSince date
+    UPDATE UserAccount
+    SET
+        UserAccount.UserTier = GREATEST(1, HostTierCounterpart.TierId - 1),
+        UserAccount.HostingSince = SYSUTCDATETIME()
+    FROM users.UserAccount
+    -- ? Join on the (tentative) host user ID
+    INNER JOIN inserted ON UserAccount.UserId = inserted.HostId
+    -- ? Then, join based on the user tier of the current (tentative) host
+    INNER JOIN users.UserTier AS InsertedUserTier ON UserAccount.UserTier = InsertedUserTier.TierId
+    -- ? Join again to bring the host tier with the one level lower than the customer tier's
+    -- ? level
+    INNER JOIN users.UserTier AS HostTierCounterpart ON InsertedUserTier.TierLevel = GREATEST(HostTierCounterpart.TierLevel)
+    -- ? To be able to assign the host tier in the top assignment, filter down ONLY
+    -- ? to rows:
+    -- ? (1) Where the current user is NOT a host
+    WHERE InsertedUserTier.IsHostTier = 0
+    -- ? (2) And filtering down to the corresponding host tier so that we can
+    -- ?     directly assign the user the new tier that is the Host counterpart tier
+    -- ?     for their current one
+    AND HostTierCounterpart.IsHostTier = 1;
+
+    -- ? If the above query returns no rows, then there is no host from the inserted
+    -- ? property(ies) who does not have a host tier, and so the update will never
+    -- ? have to happen.
+
+END;
+
+GO
+
+PRINT 'Created Property Host tier validation/conversion trigger.';
 
 GO
 

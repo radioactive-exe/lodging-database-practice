@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the User Review table
-*
-*/
+/* =====================================
+=          User Review table           =
+===================================== */
 
 DROP TABLE IF EXISTS reviews.UserReview;
 

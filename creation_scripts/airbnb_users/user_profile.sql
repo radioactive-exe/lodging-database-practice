@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the User Profile table.
-*
-*/
+/* =====================================
+=          User Profile table          =
+===================================== */
 
 DROP TABLE IF EXISTS users.UserProfile;
 

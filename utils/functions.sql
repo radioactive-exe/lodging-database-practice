@@ -1,19 +1,14 @@
-/**
-*
-* This file contains utility functions, such as regex matching/checking to be used
-* across the database.
-*
-*/
-
 /* =====================================
 =              VALIDATORS              =
 ===================================== */
 
-/**
-*
-* This function checks an input string according to regular expressions to verify its validity as a URL.
-*
-*/
+/* =====================================
+=       URL Validation function        =
+===================================== */
+
+-- ? This function checks an input string according to regular expressions to verify its
+-- ? validity as a URL.
+
 CREATE
 OR ALTER
 FUNCTION dbo.FN_IsValidURL(@InputText nvarchar(4000)) RETURNS bit
@@ -57,12 +52,13 @@ PRINT 'Created URL REGEX validation function.';
 
 GO
 
-/**
-*
-* This function checks an input string to verify its validity as an international Phone Number.
-* This includes both numbers with and without country codes (+).
-*
-*/
+/* =====================================
+=   Phone Number validation function   =
+===================================== */
+
+-- ? This function checks an input string to verify its validity as an international
+-- ? Phone Number. This includes both numbers with and without country codes (+).
+
 CREATE
 OR ALTER
 FUNCTION dbo.FN_IsValidPhoneNumber(@InputText nvarchar(50)) RETURNS bit
@@ -101,11 +97,12 @@ PRINT 'Created phone number REGEX validation function.';
 
 GO
 
-/**
-*
-* This function checks an input string to verify its validity as an email address.
-*
-*/
+/* =====================================
+=      Email Validation function       =
+===================================== */
+
+-- ? This function checks an input string to verify its validity as an email address.
+
 CREATE
 OR ALTER
 FUNCTION dbo.FN_IsValidEmail(@InputText nvarchar(512)) RETURNS bit
@@ -139,12 +136,13 @@ PRINT 'Created email address REGEX validation function.';
 
 GO
 
-/**
-*
-* This function checks an input string to verify its validity as a name, either for the first/last
-* names or the billing names.
-*
-*/
+/* =====================================
+=       Name Validation function       =
+===================================== */
+
+-- ? This function checks an input string to verify its validity as a name, either for
+-- ? the first/last names or the billing names.
+
 CREATE
 OR ALTER
 FUNCTION dbo.FN_IsValidName(@InputText nvarchar(100)) RETURNS bit
@@ -183,12 +181,13 @@ PRINT 'Created name REGEX validation function.';
 
 GO
 
-/**
-*
-* This function checks an input string to verify its validity as a username, slightly different than
-* regular names/identifiers above
-*
-*/
+/* =====================================
+=     Username Validation function     =
+===================================== */
+
+-- ? This function checks an input string to verify its validity as a username, slightly
+-- ? different than regular names/identifiers above
+
 CREATE
 OR ALTER
 FUNCTION dbo.FN_IsValidUsername(@InputText nvarchar(100)) RETURNS bit
@@ -224,12 +223,14 @@ PRINT 'Created username REGEX validation function.';
 
 GO
 
-/**
-*
-* This function checks an input string to verify its legitimacy as a credit card number
-* It uses both length/regex validations and the Luhn Algorithm (https://www.geeksforgeeks.org/dsa/luhn-algorithm/)
-*
-*/
+/* =====================================
+=    Card Number Validation function   =
+===================================== */
+
+-- ? This function checks an input string to verify its legitimacy as a credit card
+-- ? number It uses both length/regex validations and the Luhn Algorithm
+-- ? (https://www.geeksforgeeks.org/dsa/luhn-algorithm/)
+
 CREATE
 OR ALTER
 FUNCTION dbo.FN_IsValidCardNumber(@InputText varchar(30)) RETURNS bit
@@ -295,7 +296,3 @@ END;
 GO
 
 PRINT 'Created identification number validation function.';
-
-/* =====================================
-=     Calculators & other Utilities    =
-===================================== */

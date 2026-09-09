@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the Languages table
-*
-*/
+/* =====================================
+=            Languages LUT             =
+===================================== */
 
 DROP TABLE IF EXISTS users.Languages;
 
@@ -26,11 +24,9 @@ PRINT 'Created Languages LUT.';
 
 GO
 
-/**
-*
-* The creation script for the user-to-languages relationship table, implementing the m:n relationship
-*
-*/
+/* =============================================
+=  Assigned User-Languages relationship table  =
+============================================= */
 
 DROP TABLE IF EXISTS users.UserLanguages;
 

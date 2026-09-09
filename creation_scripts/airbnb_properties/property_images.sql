@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the Property Images table
-*
-*/
+/* =====================================
+=        Property Images table         =
+===================================== */
 
 DROP TABLE IF EXISTS properties.PropertyImages;
 

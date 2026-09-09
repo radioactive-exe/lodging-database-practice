@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the Payment purpose table
-*
-*/
+/* =====================================
+=          Payment Purpose LUT         =
+===================================== */
 
 DROP TABLE IF EXISTS reservations.PaymentPurpose;
 

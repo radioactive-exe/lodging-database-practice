@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the Property category table
-*
-*/
+/* =====================================
+=       Property Category table        =
+===================================== */
 
 DROP TABLE IF EXISTS properties.PropertyCategory;
 
@@ -27,11 +25,9 @@ PRINT 'Created Property Category LUT.';
 
 GO
 
-/**
-*
-* The creation script for the Property-Category relationship table
-*
-*/
+/* =====================================
+=   Assigned Property Category table   =
+===================================== */
 
 DROP TABLE IF EXISTS properties.AssignedPropertyCategories;
 

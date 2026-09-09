@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the User Accounts table.
-*
-*/
+/* =====================================
+=          User Account Table          =
+===================================== */
 
 DROP TABLE IF EXISTS users.UserAccount;
 
@@ -29,7 +27,17 @@ users.UserAccount (
 
     /* Dates and Tracking
     ===================================== */
+    -- * The user's country of residence
 
+    -- ! This was originally not in the plan, but as I was writing the test case
+    -- ! regarding checking cross-country bookings, I realised that there is no way
+    -- ! to reliably determine a user's country of origin/residence given the current
+    -- ! implementation. You have to join across the billing address table and then the
+    -- ! payment methods table to get the country of the user, inflating joins and also
+    -- ! being problematic with the fact that users can have multiple billing addresses
+    -- ! and payment methods, without a single "primary" one to derive a user's
+    -- ! potential address from.
+    UserCountry    smallint NOT NULL,
     -- * Can be null, as the user may have never hosted
     HostingSince   date,
     -- * Creation and Updating dates are automatically populated
@@ -43,9 +51,10 @@ users.UserAccount (
     -- * The Primary Key Constraint for the user account
     CONSTRAINT PK_UserId PRIMARY KEY CLUSTERED (UserId),
 
-    -- * The Foreign Key Constraint for the user tier id
+    -- * The Foreign Key Constraint for the user tier id and user Country
     CONSTRAINT FK_UserAccount_UserTier FOREIGN KEY (UserTier) REFERENCES users.UserTier (TierId)
     ON UPDATE CASCADE,
+    CONSTRAINT FK_UserAccount_Country FOREIGN KEY (UserCountry) REFERENCES locations.Country (CountryId),
 
     -- ? Checks that the phone number is a valid international number
     CONSTRAINT CHK_Valid_PhoneNumber CHECK (dbo.FN_IsValidPhoneNumber(PhoneNumber) = 1),

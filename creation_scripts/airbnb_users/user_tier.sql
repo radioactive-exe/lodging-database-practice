@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the User Tiers table.
-*
-*/
+/* =====================================
+=            User Tier LUT             =
+===================================== */
 
 DROP TABLE IF EXISTS users.UserTier;
 

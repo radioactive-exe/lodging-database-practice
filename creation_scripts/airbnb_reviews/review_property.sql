@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the Property Review table
-*
-*/
+/* =====================================
+=        Property Review table         =
+===================================== */
 
 DROP TABLE IF EXISTS reviews.PropertyReview;
 

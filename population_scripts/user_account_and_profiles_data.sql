@@ -133,6 +133,7 @@ users.UserAccount (
     Email,
     HashedPassword,
     PhoneNumber,
+    UserCountry,
     HostingSince
 )
 VALUES
@@ -141,179 +142,204 @@ VALUES
 ===================================== */
 
 (
-    6,
-    'ichiese0@dropbox.com',
-    '$2a$04$RGiMVP7czVRBzn3mYpENbuTHSvBMXId3GCw5N4jPI4eQQtBEAtMGm',
-    '+33 (164) 763-2075',
-    '2025-01-16'
-),
-(
-    4,
-    'dbatch1@nydailynews.com',
-    '$2a$04$J97Oqdyrc.hRDOSyRmsTDuCIryy5r3bXnJ6QJp4Yj7ZGwk3cmFzl2',
-    '+62 (755) 847-7794',
-    NULL
-),
-(
-    3,
-    'bneilan2@apache.org',
-    '$2a$04$izF8Zop9ksWIQVHWMTMvBehrtyTqUmijr35prDG9NXroEPwti31ea',
-    '+255 (474) 485-7259',
-    NULL
-),
-(
-    1,
-    'mfogarty3@ifeng.com',
-    '$2a$04$QSvUHn46oM5/JPwtJkM9iO80ZhNb7O2i2uPLc8OJoQA8Fh/671f9a',
-    '+256 (900) 674-3230',
-    NULL
-),
-(
-    1,
-    'scollister4@cnet.com',
-    '$2a$04$tFKOBQrAb9/qeIfN26CkAuZJ2NkDHLIS1nu6TCdEpfr7kkcCn8Srq',
-    '+46 (385) 995-4471',
+    2,
+    'aaddlestone0@behance.net',
+    '$2a$04$Be6k0xf5UQwFH2lAcaliReH7xC.FBpC.vVU0wRlzD5lQi0GsbOUz.',
+    '+63 (465) 957-7301',
+    11,
     NULL
 ),
 (
     8,
-    'jsolman5@histats.com',
-    '$2a$04$GbRJ1DBDsyNLYwJL3QTgoec0tlyDTCQ4PnReLhM4ldgBdO5rLSqYW',
-    '+56 (360) 724-5977',
-    '2020-07-05'
-),
-(
+    'clairdcraig1@behance.net',
+    '$2a$04$YI5tI2d9yLWaXsQTsZhNlO.RIZC0hYcAoSdOSYzcmwSd2Y.50841C',
+    '+62 (564) 962-0421',
     4,
-    'eblacklidge6@dailymotion.com',
-    '$2a$04$qlU4OmrwCXcx4J5NsbL0LuqCo9GKlDM7TFL8ZZ.DZb7aFVbdWe0aS',
-    '+46 (501) 936-1791',
-    NULL
-),
-(
-    1,
-    'fhaxby7@ucsd.edu',
-    '$2a$04$hkDbaBnKxxXfnxJ8fCUQtuDreoP6JT9HBOIxsW/R5KqCEz4dZB.xG',
-    '+86 (893) 128-8121',
-    NULL
-),
-(
-    3,
-    'owyllie8@paypal.com',
-    '$2a$04$MuHzRDC3nRPb50wdVhavGudxvSvXlbDsDQgXPiHfwHC2My8VpdNAK',
-    '+86 (376) 642-6326',
-    NULL
-),
-(
-    8,
-    'rnudd9@barnesandnoble.com',
-    '$2a$04$PK1S33okFmNJzsKXPdXjSOXAzmTwmdgobMvaVBMb6j8LJ1ImwQtOG',
-    '+86 (592) 953-5449',
-    '2025-03-10'
+    '2026-04-11'
 ),
 (
     5,
-    'cpetraitisa@sciencedirect.com',
-    '$2a$04$iO./qgTD4Ck03On.YYGLC.1TqCENyMftuOU8i1RA.RYxbRpyE28nO',
-    '+48 (635) 788-2494',
-    '2025-02-17'
-),
-(
-    5,
-    'mwallsworthb@uiuc.edu',
-    '$2a$04$HQfSlhv1aPd1jGgCiJbrXe3i.uPTIgL/TYox9e1TAx61bX27Nn81a',
-    '+1 (860) 568-7424',
-    '2022-12-22'
-),
-(
-    2,
-    'mvyec@washingtonpost.com',
-    '$2a$04$oa0jrycQSlxYWAFn.irvfOqbNiuFAGyWsE2VUre5ItnARECBW1iTe',
-    '+55 (709) 852-0172',
-    NULL
-),
-(
-    2,
-    'eprettyjohnsd@symantec.com',
-    '$2a$04$sNO3fK/DzkEJCMIt9Zy1gu.rxoEQ/PlmNh5VNewILXempZ6jauqFq',
-    '+62 (190) 235-8604',
-    NULL
-),
-(
-    6,
-    'blistone@google.nl',
-    '$2a$04$DFUhUGO8KAtj6XniEh0Bd.atO9hp6cHONDaQXtLbqxqble9Pc3TW6',
-    '+51 (153) 961-7633',
-    '2025-10-13'
-),
-(
-    2,
-    'creganf@slashdot.org',
-    '$2a$04$aEVIbXCTNGJ8zB2ECJZEQupJ.YlPiNOLfh36BMKr2Bbb6K7Ju8V.O',
-    '+237 (336) 464-3421',
-    NULL
-),
-(
-    6,
-    'nramshawg@ocn.ne.jp',
-    '$2a$04$mZclPUDMpASrsm4DFViZ9OljK1sjGqHwFmn7PK/KVrjViv1780iZS',
-    '+86 (339) 547-3406',
-    '2021-09-14'
-),
-(
-    7,
-    'jrawlisonh@businessweek.com',
-    '$2a$04$nQqqy2TkDj7/VVTtdfN2kua111M9Y4TPgKMJWFff28F7TxqcD8YLG',
-    '+86 (876) 552-2825',
-    '2021-03-24'
-),
-(
-    1,
-    'aboogi@usa.gov',
-    '$2a$04$0aVvnVqYg.XikVlzr48PIeADGRygmx1Ge87JCv9YLHAEKBJJ/9bBq',
-    '+81 (679) 514-8312',
-    NULL
-),
-(
-    2,
-    'mincognaj@free.fr',
-    '$2a$04$mkDy4M6TsoVcYh1zD1hfu.vvuAxmIrGORdWwInzXogbkpHZ0MLKZ2',
-    '+27 (824) 742-2034',
-    NULL
-),
-(
-    6,
-    'shallask@a8.net',
-    '$2a$04$NDDRouKN/Pa/7H0fh8u3gOJfPm8bEe5fPQZK13/xH1e.kxPiq08iC',
-    '+46 (901) 941-6197',
-    '2024-09-03'
+    'sgemnett2@bloomberg.com',
+    '$2a$04$nCqoEsEyzbSAz7CK/0u1XuGU.Rha6x.S9BUhffsrvlQatEPS68/FC',
+    '+63 (473) 213-1507',
+    10,
+    '2026-05-14'
 ),
 (
     4,
-    'achifneyl@topsy.com',
-    '$2a$04$fo7rteueniYYidi8Zii64ejoRSMF1PTOES.rHIxxcBZA5jQ12X/v6',
-    '+86 (405) 465-2008',
+    'fmordue3@msn.com',
+    '$2a$04$baWceSKZmTlm05YqUFqbYux9MsbHODHrQhJqWMKIQHnbSfGl59HRO',
+    '+31 (557) 140-5223',
+    16,
     NULL
 ),
 (
     8,
-    'wthomelm@google.com.br',
-    '$2a$04$I1o1tlNAfYIbGb2Ja4AefOi0wRINczIn2gLaM2UfoAsmMRHXJLvGy',
-    '+81 (261) 648-3031',
-    '2024-05-23'
+    'ksandsallan4@webs.com',
+    '$2a$04$MkhMmuygTU2B6S.grdsPJOZc.tHe3hpvFUFqcE/z.dZW4rb06Wzde',
+    '+55 (918) 854-7400',
+    14,
+    '2025-12-01'
+),
+(
+    5,
+    'hcopnell5@biblegateway.com',
+    '$2a$04$TMIc8tbsdOJgDf8puq37xOTACapGJXowdstB29iR/UXC4NyjPNUTS',
+    '+354 (547) 644-7915',
+    13,
+    '2025-10-07'
+),
+(
+    6,
+    'backermann6@marketwatch.com',
+    '$2a$04$j8W00JHet1umrqkdAcP9cu975OxDNn4kPV8g2SctZo.kCQgEua4uC',
+    '+7 (822) 862-0355',
+    1,
+    '2026-08-23'
+),
+(
+    1,
+    'mablitt7@behance.net',
+    '$2a$04$sm4MX/GOPuMWU87H3UhR9e4BB.dxvcFRGiLEDf4qlbGX05SYyExKu',
+    '+593 (625) 710-6487',
+    11,
+    NULL
 ),
 (
     2,
-    'dgiraudeln@123-reg.co.uk',
-    '$2a$04$62CeidWEKfioxyAhVgrk4.hW2SoDOrOoDaKnjHkCV1MrRLt/31umG',
-    '+7 (606) 127-9643',
+    'rronchi8@pbs.org',
+    '$2a$04$D45/31/rPeFQJoB2rxfvae4ICTHN9eGk1Swj8ntEFKeFewpsVFR6C',
+    '+86 (611) 122-6518',
+    4,
     NULL
 ),
 (
-    3,
-    'mcarseyo@indiegogo.com',
-    '$2a$04$NM09ruTx6ZnwW3TNVrdzge2yqaPkgeNxgQaS8rHWk/a11qe1MrGUa',
-    '+420 (235) 178-5829',
+    8,
+    'kedington9@craigslist.org',
+    '$2a$04$Y5UiRcYvZSMeocdFoNKds.CTtpMQkIEmRx2Kwz6ryVNiXf22TJIIu',
+    '+370 (606) 868-3696',
+    18,
+    '2026-05-17'
+),
+(
+    8,
+    'rbullinghama@deliciousdays.com',
+    '$2a$04$43xkrIB9L1LdsjDRsh/1GOTS2WJXl1FCbaJRD2aSOVnVGOdkEm66S',
+    '+212 (633) 784-7540',
+    20,
+    '2026-01-21'
+),
+(
+    6,
+    'khowkinsb@purevolume.com',
+    '$2a$04$EPP5lFWAH8kS69HzU7aaZOFVPVW5SgdKRo1T/Q/1wPd5x927cq22q',
+    '+86 (426) 988-4641',
+    17,
+    '2025-09-26'
+),
+(
+    2,
+    'cmazonowiczc@amazonaws.com',
+    '$2a$04$PjfIg4Pbu4rk7XXP4niPJu7.zNOB.eaUJETNtSs1JvDyAcDD0hxXG',
+    '+7 (731) 893-7165',
+    8,
     NULL
+),
+(
+    5,
+    'jkebelld@blogger.com',
+    '$2a$04$VFh.HJF5OiGW/oZQFBH4DOGDVPJhPs8M/H7HJYhzN/uTTEsz2W/re',
+    '+595 (973) 799-9384',
+    6,
+    '2025-10-01'
+),
+(
+    2,
+    'nrassmanne@deviantart.com',
+    '$2a$04$FhzymmYV9EGqyXVRJKhCO.OI9Rafh5WaEdqFMnMh028halb2XdSlq',
+    '+359 (870) 925-6942',
+    15,
+    NULL
+),
+(
+    2,
+    'rcumberlandf@ning.com',
+    '$2a$04$0kcWdHPXgLvSvtRADjqsuu0CwHJFKsGGQIz2dc4rWH1SMFjPkhVl2',
+    '+66 (442) 597-1482',
+    9,
+    NULL
+),
+(
+    5,
+    'slevesleyg@gov.uk',
+    '$2a$04$PNKc2BK94FM.eaIyaHBAX.qV5ACk53IgCZdvdog0FDlKPhX2UgKCe',
+    '+86 (858) 465-1151',
+    20,
+    '2026-02-05'
+),
+(
+    1,
+    'gsatfordh@angelfire.com',
+    '$2a$04$eRD10D9VnF8p7j6JdEv9zecrdcvSX9NjLBMwixl8XAlHTfUXwYv8y',
+    '+62 (970) 773-4508',
+    10,
+    NULL
+),
+(
+    8,
+    'adebruijnei@digg.com',
+    '$2a$04$0Jh106wTOj0G07DmlUKXnuUGSrW1pZzhLpwDc9q70AwMjyFcyq7Hu',
+    '+86 (837) 330-9582',
+    12,
+    '2026-06-18'
+),
+(
+    5,
+    'hbursnellj@va.gov',
+    '$2a$04$gls/XUowC.B0AOveBweSSOzEgVfS4cRTotLzkH5SXB2F6plMhTy5q',
+    '+62 (240) 732-8430',
+    3,
+    '2026-07-26'
+),
+(
+    6,
+    'fcoldhamk@umn.edu',
+    '$2a$04$IgF/ib1s2BUsK/Ny7xru7.YTzmniI3A7MU.AhqjEgVV4kufTGZyIy',
+    '+994 (280) 865-6257',
+    21,
+    '2025-10-17'
+),
+(
+    5,
+    'fcuffel@artisteer.com',
+    '$2a$04$M.TOUPIeYmItRvEO/U1N0eMBMMy0xo3eOD35HMWJGaG/Wy42MGvg.',
+    '+7 (487) 883-9045',
+    15,
+    '2026-04-01'
+),
+(
+    5,
+    'ofleurym@oracle.com',
+    '$2a$04$gbAQ9yknQht73kZjl15YieqnuVQDea/DoZm9NjY8kdS1/ZxcfZ7Om',
+    '+1 (861) 316-7392',
+    5,
+    '2026-03-24'
+),
+(
+    5,
+    'wlomasnyn@skyrock.com',
+    '$2a$04$QWnSn0TWEPnebt2pHSm0Fuku4tIDxLeGSDmJpr6ZzaQImgq7int8K',
+    '+501 (396) 344-0601',
+    13,
+    '2026-06-03'
+),
+(
+    5,
+    'adevinno@nationalgeographic.com',
+    '$2a$04$7jttyiyBtXfF4cPrn81eBuUdnr7I07l.Knz0v1SE2pInmmCA0aoM6',
+    '+33 (654) 636-1330',
+    6,
+    '2026-03-17'
 );
 
 PRINT 'Populated User Account table.';

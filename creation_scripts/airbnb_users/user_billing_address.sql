@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the Billing Addresses table
-*
-*/
+/* =====================================
+=     User Billing Addresses table     =
+===================================== */
 
 DROP TABLE IF EXISTS users.BillingAddress;
 

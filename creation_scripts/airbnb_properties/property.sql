@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the Property table
-*
-*/
+/* =====================================
+=            Property table            =
+===================================== */
 
 DROP TABLE IF EXISTS properties.Property;
 
@@ -71,3 +69,56 @@ CREATE TABLE properties.Property (
 );
 
 PRINT 'Created Property table.';
+
+GO
+
+/* ======================================
+= Property Host tier validation trigger =
+====================================== */
+
+CREATE TRIGGER properties.TR_Property_ValidateHostTier
+ON properties.Property
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    -- ? Unneeded response of rows affected
+    SET NOCOUNT ON;
+
+    -- ? Update the host's tier to the host counterpart one level lower than their
+    -- ! current tier, to a minimum of the standard host tier. This is to account for
+    -- ! the host-related milestones that the user has yet to achieve, but still does
+    -- ! not completely disregard their loyalty to the platform as a customer.
+    -- ? This update happens if and only if a row is returned from this query.
+    -- ? This assignment is also one line because we are copying the value from one
+    -- ? column into another based on the filtering at the end of this query
+    -- ? Additionally, populate their HostingSince date
+    UPDATE UserAccount
+    SET
+        UserAccount.UserTier = GREATEST(1, HostTierCounterpart.TierId - 1),
+        UserAccount.HostingSince = SYSUTCDATETIME()
+    FROM users.UserAccount
+    -- ? Join on the (tentative) host user ID
+    INNER JOIN inserted ON UserAccount.UserId = inserted.HostId
+    -- ? Then, join based on the user tier of the current (tentative) host
+    INNER JOIN users.UserTier AS InsertedUserTier ON UserAccount.UserTier = InsertedUserTier.TierId
+    -- ? Join again to bring the host tier with the one level lower than the customer tier's
+    -- ? level
+    INNER JOIN users.UserTier AS HostTierCounterpart ON InsertedUserTier.TierLevel = GREATEST(HostTierCounterpart.TierLevel)
+    -- ? To be able to assign the host tier in the top assignment, filter down ONLY
+    -- ? to rows:
+    -- ? (1) Where the current user is NOT a host
+    WHERE InsertedUserTier.IsHostTier = 0
+    -- ? (2) And filtering down to the corresponding host tier so that we can
+    -- ?     directly assign the user the new tier that is the Host counterpart tier
+    -- ?     for their current one
+    AND HostTierCounterpart.IsHostTier = 1;
+
+    -- ? If the above query returns no rows, then there is no host from the inserted
+    -- ? property(ies) who does not have a host tier, and so the update will never
+    -- ? have to happen.
+
+END;
+
+GO
+
+PRINT 'Created Property Host tier validation/conversion trigger.';

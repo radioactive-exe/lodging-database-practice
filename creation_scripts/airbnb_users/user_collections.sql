@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the User Collections table
-*
-*/
+/* =====================================
+=        User Collections table        =
+===================================== */
 
 DROP TABLE IF EXISTS users.UserCollections;
 
@@ -51,12 +49,12 @@ PRINT 'Created One-Favourites-Collection-Per-User User Collections Table Validat
 
 GO
 
-/**
-*
-* The trigger that inserts a favourites collection into the collections table when
-* a new user joins
-*
-*/
+/* ============================================
+= User Favourites Collection creation trigger =
+============================================ */
+
+-- ? The trigger inserts a favourites collection into the collections table when a new
+-- ? user joins
 
 CREATE TRIGGER users.TR_UserCollection_InsertFavouritesOnUserJoin
 ON users.UserAccount

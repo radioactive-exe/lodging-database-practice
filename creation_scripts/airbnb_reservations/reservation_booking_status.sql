@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the Booking status table
-*
-*/
+/* =====================================
+=          Booking Status LUT          =
+===================================== */
 
 DROP TABLE IF EXISTS reservations.BookingStatus;
 

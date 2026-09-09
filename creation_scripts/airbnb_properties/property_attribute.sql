@@ -1,8 +1,7 @@
-/**
-*
-* The creation script for the Property Attribute type table
-*
-*/
+/* =====================================
+=    Property Attribute Type table     =
+===================================== */
+
 
 DROP TABLE IF EXISTS properties.AttributeType;
 
@@ -27,11 +26,9 @@ PRINT 'Created Property Attribute Type LUT.';
 
 GO
 
-/**
-*
-* The creation script for the Property attribute table
-*
-*/
+/* =====================================
+=       Property Attribute table       =
+===================================== */
 
 DROP TABLE IF EXISTS properties.PropertyAttribute;
 
@@ -67,11 +64,9 @@ PRINT 'Created Property Attribute LUT.';
 
 GO
 
-/**
-*
-* The creation script for the Property-Attribute relationship table
-*
-*/
+/* ===============================================
+= Assigned property-attribute relationship table =
+=============================================== */
 
 DROP TABLE IF EXISTS properties.AssignedPropertyAttributes;
 

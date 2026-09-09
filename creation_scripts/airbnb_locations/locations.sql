@@ -1,8 +1,6 @@
-/**
-*
-* The creation scripts for all 4 location info tables (location, area, country, and region)
-*
-*/
+/* =====================================
+=      The Location schema tables      =
+===================================== */
 
 -- * Drop them in reverse order of their FK relationships, if needed
 -- * This technically never matters if you are running the PS script, but ordered nonetheless
@@ -11,11 +9,9 @@ DROP TABLE IF EXISTS locations.Area;
 DROP TABLE IF EXISTS locations.Country;
 DROP TABLE IF EXISTS locations.Region;
 
-/**
-*
-* The Region table
-*
-*/
+/* =====================================
+=           The Region table           =
+===================================== */
 
 CREATE TABLE locations.Region (
 
@@ -35,11 +31,9 @@ CREATE TABLE locations.Region (
 
 PRINT 'Created Region table.';
 
-/**
-*
-* The Country table, one step more specific from the Region table
-*
-*/
+/* =====================================
+=          The Country table           =
+===================================== */
 
 CREATE TABLE locations.Country (
 
@@ -65,11 +59,9 @@ CREATE TABLE locations.Country (
 
 PRINT 'Created Country table.';
 
-/**
-*
-* The area table, narrowed within countries
-*
-*/
+/* =====================================
+=            The Area table            =
+===================================== */
 
 CREATE TABLE locations.Area (
 
@@ -98,11 +90,9 @@ CREATE TABLE locations.Area (
 
 PRINT 'Created Area table.';
 
-/**
-*
-* The location table, for specific streets, blocks, or more within the areas
-*
-*/
+/* =====================================
+=     The granular Location table      =
+===================================== */
 
 CREATE TABLE locations.Location (
 

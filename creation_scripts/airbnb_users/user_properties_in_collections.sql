@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the User Collection Properties table
-*
-*/
+/* ====================================================
+=  Properties in User Collections relationship table  =
+==================================================== */
 
 DROP TABLE IF EXISTS users.PropertiesInCollections;
 

@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the Guest type table
-*
-*/
+/* =====================================
+=           Guest Type table           =
+===================================== */
 
 DROP TABLE IF EXISTS reservations.GuestType;
 
@@ -27,11 +25,9 @@ PRINT 'Created Guest Type LUT.';
 
 GO
 
-/**
-*
-* The creation script for the Booking-Guest relationship table
-*
-*/
+/* =====================================
+=   Booking-Guest relationship table   =
+===================================== */
 
 DROP TABLE IF EXISTS reservations.BookingGuests
 

@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the Property Booking table
-*
-*/
+/* =====================================
+=       Property Bookings table        =
+===================================== */
 
 DROP TABLE IF EXISTS reservations.PropertyBookings;
 
@@ -87,11 +85,12 @@ PRINT 'Created Property Bookings table.';
 
 GO
 
-/**
-*
-* The trigger that calculates and populates the price info for a booking based on the property pricing
-*
-*/
+/* ========================================
+=  Booking Price info Population trigger  =
+======================================== */
+
+-- ? The trigger calculates and populates the price info for a booking based on the
+-- ? property pricing
 
 CREATE TRIGGER reservations.TR_Bookings_PopulatePriceInfo
 ON reservations.PropertyBookings

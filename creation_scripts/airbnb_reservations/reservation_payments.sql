@@ -1,8 +1,8 @@
-/**
-*
-* The creation script for the Payments table, tracking all payments for bookings, installments, refunds, etc.
-*
-*/
+/* =====================================
+=            Payments table            =
+===================================== */
+
+-- ? The Payments table tracks all payments for bookings, installments, refunds, etc.
 
 DROP TABLE IF EXISTS reservations.Payments;
 
@@ -78,12 +78,12 @@ PRINT 'Created Payments table.';
 
 GO
 
-/**
-*
-* The function that calculates the remaining balance to be paid after a newly inputted payment/refund,
-* accounting for the payment type and booking status
-*
-*/
+/* ====================================================
+= Remaining Balance Post-payment Calculation function =
+==================================================== */
+
+-- ? The function calculates the remaining balance to be paid after a newly inputted
+-- ? payment/refund, accounting for the payment type and booking status
 
 CREATE FUNCTION reservations.FN_GetRemainingBalance(
     -- * The associated booking to get the payment information for
@@ -198,14 +198,22 @@ PRINT 'Created Remaining Booking Balance Calculation function.';
 
 GO
 
+/* ==============================================
+= Payment Remaining Balance calculation trigger =
+============================================== */
+
 /**
 *
-* The trigger that calculates and populates the remaining balance column in the Payments table on inserting a new payment
-* ! This was originally planned to be a computed column, but unfortunately because I am using a defined function, I could not set it
-* ! as PERSISTED, which meant that this would have to be dynamically calculated on each SELECT. That is definitely not well optimised
-* ! Also, that is why this trigger merely calls the function itself instead of housing the logic - I reused the function above in the trigger
-* ! without having to refactor the whole function to work in a trigger. Also, this allows me to properly/clearly document everything in the function above
+* The trigger calculates and populates the remaining balance column in the Payments
+* table on inserting a new payment
 *
+* ! This was originally planned to be a computed column, but unfortunately because I
+* ! am using a defined function, I could not set it as PERSISTED, which meant that
+* ! this would have to be dynamically calculated on each SELECT. That is definitely not
+* ! well optimised. Also, that is why this trigger merely calls the function itself
+* ! instead of housing the logic - I reused the function above in the trigger without
+* ! having to refactor the whole function to work in a trigger. Also, this allows me to
+* ! properly/clearly document everything in the function above
 */
 
 CREATE TRIGGER reservations.TR_Payments_PopulateRemainingBalance

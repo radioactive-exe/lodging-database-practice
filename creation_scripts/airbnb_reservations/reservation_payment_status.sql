@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the Payment status table
-*
-*/
+/* =====================================
+=          Payment Status LUT          =
+===================================== */
 
 DROP TABLE IF EXISTS reservations.PaymentStatus;
 

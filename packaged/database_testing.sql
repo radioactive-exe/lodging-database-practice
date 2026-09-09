@@ -9,7 +9,8 @@
 /* User Account table
 ===================================== */
 
--- ? Gets the email and phone numbers of all host users, along with their hosting debut and tier, in order of tier
+-- ? Gets the email and phone numbers of all host users, along with their hosting
+-- ? debut and tier, in order of tier
 
 SELECT
     UserAccount.Email,
@@ -24,7 +25,8 @@ ORDER BY UserAccount.UserTier ASC;
 /* User Profile table
 ===================================== */
 
--- ? Gets the public UUIDs and full names of all users who have a Linkedin account connected to their Airbnb accounts
+-- ? Gets the public UUIDs and full names of all users who have a Linkedin account
+-- ? connected to their Airbnb accounts
 
 SELECT
     PublicUserUuid,
@@ -58,7 +60,8 @@ WHERE UserTier.IsHostTier = 0;
 /* User Collections and their properties
 ===================================== */
 
--- ? Gets all collection names, creator names, and public state for collections that have one of the first 5 properties defined
+-- ? Gets all collection names, creator names, and public state for collections that
+-- ? have one of the first 5 properties defined
 
 SELECT
     UserCollections.CollectionName,
@@ -78,7 +81,8 @@ WHERE UserCollections.CollectionId IN (
 /* User Billing data tables
 ===================================== */
 
--- ? Gets the address information for all addresses that have an associated card payment method
+-- ? Gets the address information for all addresses that have an associated card
+-- ? payment method
 
 SELECT
     BA.AddressId,
@@ -94,7 +98,7 @@ WHERE EXISTS (
     SELECT * -- noqa: RF02
     FROM users.PaymentMethod AS PM
     WHERE
-        PM.BillingAddress = BA.AddressId -- noqa: RF03
+        PM.BillingAddress = BA.AddressId -- noqa
         AND PM.MethodType = 1
 );
 
@@ -182,7 +186,8 @@ GROUP BY (SectorType.TypeName);
 /* Property category tables
 ======================================== */
 
--- ? Gets the number of times a category was assigned and orders the categories by quantity
+-- ? Gets the number of times a category was assigned and orders the categories by
+-- ? quantity
 
 SELECT
     PropertyCategory.CategoryName,
@@ -195,7 +200,8 @@ ORDER BY NumOfProperties DESC;
 /* Property attribute tables
 ===================================== */
 
--- ? Gets and ranks properties by the number of notable attributes they have as well as by the number of amenities
+-- ? Gets and ranks properties by the number of notable attributes they have as well
+-- ? as by the number of amenities
 
 SELECT
     APA.PropertyId,
@@ -287,7 +293,8 @@ ORDER BY NumOfReviews DESC, AverageBookingRating DESC;
 /* User review table
 ===================================== */
 
--- ? Gets the total number of times each user has been reviewed (with their name), and the average rating
+-- ? Gets the total number of times each user has been reviewed (with their name),
+-- ? and the average rating
 
 SELECT
     UserProfile.UserId,
@@ -305,8 +312,9 @@ ORDER BY NumOfReviews DESC;
 =       Large scale system tests        =
 ====================================== */
 
--- ? Gets the names of collections and their creators where the creator has added at least one of the
--- ? properties in it, AND when the properties they have added have reviews (aka > 0* with our small dataset)
+-- ? Gets the names of collections and their creators where the creator has added at
+-- ? least one of the ? properties in it, AND when the properties they have added have
+-- ? reviews (aka > 0* with our small dataset)
 
 WITH
     PropertiesAndAverageRatings AS (
@@ -317,7 +325,7 @@ WITH
         INNER JOIN reviews.PropertyReview ON PropertyBookings.BookingId = PropertyReview.AssociatedBookingId
         GROUP BY PropertyBookings.PropertyId
     )
-    
+
 SELECT
     UserCollections.CollectionId,
     UserCollections.CollectionName,
@@ -344,3 +352,96 @@ HAVING (
 ) AND (
     PAARs.AverageRating > 0
 );
+
+-- ? Gets the total number of collections and the total number of distinct properties
+-- ? saved in all of them ? for each user, as well as the number of properties they
+-- ? host and the compiled minimum and maximum guest counts for them
+
+WITH
+    HostsAndPropertyCount AS (
+        SELECT
+            UserAccount.UserId                    AS HostId,
+            ISNULL(COUNT(Property.PropertyId), 0) AS PropertyCount
+        FROM
+            users.UserAccount
+        LEFT JOIN properties.Property ON UserAccount.UserId = Property.HostId
+        GROUP BY UserAccount.UserId
+    ),
+
+    HostsAndMinMaxOcc AS (
+        SELECT
+            UserAccount.UserId,
+            SUM(PropertySectors.MinOccupants) AS CompiledMinOccupants,
+            SUM(PropertySectors.MaxOccupants) AS CompiledMaxOccupants
+        FROM users.UserAccount
+        LEFT JOIN properties.Property ON UserAccount.UserId = Property.HostId
+        LEFT JOIN properties.PropertySectors ON Property.PropertyId = PropertySectors.PropertyId
+        GROUP BY UserAccount.UserId
+    )
+
+SELECT
+    UserAccount.UserId,
+    HostsAndPropertyCount.PropertyCount,
+    HostsAndMinMaxOcc.CompiledMinOccupants,
+    HostsAndMinMaxOcc.CompiledMaxOccupants,
+    COUNT(UserCollections.CollectionId)                AS NumOfCollections,
+    COUNT(DISTINCT PropertiesInCollections.PropertyId) AS NumOfSavedProperties
+FROM users.UserAccount
+INNER JOIN users.UserCollections ON UserAccount.UserId = UserCollections.CreatorId
+INNER JOIN users.PropertiesInCollections ON UserCollections.CollectionId = PropertiesInCollections.CollectionId
+INNER JOIN HostsAndPropertyCount ON UserAccount.UserId = HostsAndPropertyCount.HostId
+INNER JOIN HostsAndMinMaxOcc ON UserAccount.UserId = HostsAndMinMaxOcc.UserId
+GROUP BY UserAccount.UserId, HostsAndPropertyCount.PropertyCount, HostsAndMinMaxOcc.CompiledMinOccupants, HostsAndMinMaxOcc.CompiledMaxOccupants
+ORDER BY UserAccount.UserId;
+
+-- ? Ranks hosts by the number of cross-country bookings, the number of countries these
+-- ? cross-country bookings came from, the number of reviews received by these cross
+-- ? country bookings, the number of reviews above the average database rating
+
+WITH
+    AverageRating AS (
+        SELECT AVG(TotalRating) AS AverageRating
+        FROM reviews.PropertyReview
+        WHERE TotalRating > 0
+    ),
+
+    CrossCountryBookings AS (
+        SELECT
+            PropertyBookings.BookingId,
+            PropertyBookings.BookerId AS CustomerId,
+            Property.HostId,
+            Customer.UserCountry      AS CustomerCountry,
+            Host.UserCountry          AS HostCountry
+        FROM reservations.PropertyBookings
+        INNER JOIN properties.Property ON PropertyBookings.PropertyId = Property.PropertyId
+        INNER JOIN users.UserAccount AS Host ON Property.HostId = Host.UserId
+        INNER JOIN users.UserAccount AS Customer ON PropertyBookings.BookerId = Customer.UserId
+        WHERE Customer.UserCountry <> Host.UserCountry
+    ),
+
+    CCBookingReviews AS (
+        SELECT
+            CCBooks.BookingId,
+            PropertyReview.ReviewId,
+            PropertyReview.TotalRating,
+            (IIF(PropertyReview.TotalRating >= (SELECT TOP 1 AverageRating.AverageRating FROM AverageRating), 1, 0)) AS IsAboveAverage
+        FROM CrossCountryBookings AS CCBooks
+        INNER JOIN reviews.PropertyReview ON CCBooks.BookingId = PropertyReview.AssociatedBookingId
+    )
+
+SELECT
+    CCBookings.HostId,
+    (
+        UserProfile.FirstName
+        + ' '
+        + UserProfile.LastName
+    )                                          AS HostName,
+    COUNT(DISTINCT CCBookings.BookingId)       AS NumOfCCBookings,
+    COUNT(DISTINCT CCBookings.CustomerCountry) AS DistinctCCBookingOrigins,
+    COUNT(DISTINCT CCReviews.ReviewId)         AS NumOfCCReviews,
+    SUM(ISNULL(CCReviews.IsAboveAverage, 0))   AS NumOfAboveAverageCCRatings
+FROM CrossCountryBookings AS CCBookings
+LEFT JOIN CCBookingReviews AS CCReviews ON CCBookings.BookingId = CCReviews.BookingId
+INNER JOIN users.UserProfile ON CCBookings.HostId = UserProfile.UserId
+GROUP BY CCBookings.HostId, UserProfile.FirstName, UserProfile.LastName
+ORDER BY DistinctCCBookingOrigins DESC, NumOfCCBookings DESC, NumOfCCReviews DESC, NumOfAboveAverageCCRatings DESC;

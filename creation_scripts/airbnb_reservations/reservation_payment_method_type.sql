@@ -1,8 +1,6 @@
-/**
-*
-* The creation script for the Payment Method Type table
-*
-*/
+/* =====================================
+=       Payment Method Type table      =
+===================================== */
 
 DROP TABLE IF EXISTS reservations.PaymentMethodType;
 

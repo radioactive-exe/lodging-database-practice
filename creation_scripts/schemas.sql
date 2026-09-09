@@ -1,8 +1,7 @@
-/**
-*
-* The file that creates all the schemas that will be populated in the database
-*
-*/
+/* =====================================
+=         Creating the schemas         =
+===================================== */
+
 
 -- * The User data schema with accounts, profiles, collections, and more
 IF NOT EXISTS (

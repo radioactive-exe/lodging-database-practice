@@ -19,14 +19,3 @@ GO
 
 -- ? And then recreate it from scratch
 CREATE DATABASE Airbnb;
-
-/**
-*
-* TODO:
-*  Variable case change
-*  Changing the UUID and the internal ID etc
-*  Bigint and smallint etc
-*  varchar vs nvarchar
-*  Making names more specific/clear
-*
-*/

@@ -52,7 +52,7 @@ CREATE TABLE reviews.UserReview (
     ),
 
     -- ? Ensures no user is reviewing themselves
-    CONSTRAINT CHK_Valid_UserReviewReviewerTarget CHECK (ReviewerId != TargetId)
+    CONSTRAINT CHK_Valid_UserReviewReviewerTarget CHECK (ReviewerId <> TargetId)
 );
 
 PRINT 'Created User Review table.';

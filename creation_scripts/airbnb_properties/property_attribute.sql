@@ -2,7 +2,6 @@
 =    Property Attribute Type table     =
 ===================================== */
 
-
 DROP TABLE IF EXISTS properties.AttributeType;
 
 CREATE TABLE properties.AttributeType (

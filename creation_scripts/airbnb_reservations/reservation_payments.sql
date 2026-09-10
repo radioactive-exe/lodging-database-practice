@@ -71,7 +71,7 @@ CREATE TABLE reservations.Payments (
     CONSTRAINT CHK_NonNegative_PaymentAmount CHECK (PaidAmount >= 0),
 
     -- ? Checks that the payer and payee are not the same user (no money laundering in this database on my watch)
-    CONSTRAINT CHK_Payments_DiffParties CHECK (PayerId != PayeeId)
+    CONSTRAINT CHK_Payments_DiffParties CHECK (PayerId <> PayeeId)
 );
 
 PRINT 'Created Payments table.';

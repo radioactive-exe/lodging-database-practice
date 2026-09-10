@@ -2,7 +2,6 @@
 =         Creating the schemas         =
 ===================================== */
 
-
 -- * The User data schema with accounts, profiles, collections, and more
 IF NOT EXISTS (
     SELECT name

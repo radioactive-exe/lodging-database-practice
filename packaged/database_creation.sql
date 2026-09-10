@@ -1,19 +1,14 @@
-/**
-*
-* This file contains utility functions, such as regex matching/checking to be used
-* across the database.
-*
-*/
-
 /* =====================================
 =              VALIDATORS              =
 ===================================== */
 
-/**
-*
-* This function checks an input string according to regular expressions to verify its validity as a URL.
-*
-*/
+/* =====================================
+=       URL Validation function        =
+===================================== */
+
+-- ? This function checks an input string according to regular expressions to verify its
+-- ? validity as a URL.
+
 CREATE
 OR ALTER
 FUNCTION dbo.FN_IsValidURL(@InputText nvarchar(4000)) RETURNS bit
@@ -57,12 +52,13 @@ PRINT 'Created URL REGEX validation function.';
 
 GO
 
-/**
-*
-* This function checks an input string to verify its validity as an international Phone Number.
-* This includes both numbers with and without country codes (+).
-*
-*/
+/* =====================================
+=   Phone Number validation function   =
+===================================== */
+
+-- ? This function checks an input string to verify its validity as an international
+-- ? Phone Number. This includes both numbers with and without country codes (+).
+
 CREATE
 OR ALTER
 FUNCTION dbo.FN_IsValidPhoneNumber(@InputText nvarchar(50)) RETURNS bit
@@ -101,11 +97,12 @@ PRINT 'Created phone number REGEX validation function.';
 
 GO
 
-/**
-*
-* This function checks an input string to verify its validity as an email address.
-*
-*/
+/* =====================================
+=      Email Validation function       =
+===================================== */
+
+-- ? This function checks an input string to verify its validity as an email address.
+
 CREATE
 OR ALTER
 FUNCTION dbo.FN_IsValidEmail(@InputText nvarchar(512)) RETURNS bit
@@ -139,12 +136,13 @@ PRINT 'Created email address REGEX validation function.';
 
 GO
 
-/**
-*
-* This function checks an input string to verify its validity as a name, either for the first/last
-* names or the billing names.
-*
-*/
+/* =====================================
+=       Name Validation function       =
+===================================== */
+
+-- ? This function checks an input string to verify its validity as a name, either for
+-- ? the first/last names or the billing names.
+
 CREATE
 OR ALTER
 FUNCTION dbo.FN_IsValidName(@InputText nvarchar(100)) RETURNS bit
@@ -183,12 +181,13 @@ PRINT 'Created name REGEX validation function.';
 
 GO
 
-/**
-*
-* This function checks an input string to verify its validity as a username, slightly different than
-* regular names/identifiers above
-*
-*/
+/* =====================================
+=     Username Validation function     =
+===================================== */
+
+-- ? This function checks an input string to verify its validity as a username, slightly
+-- ? different than regular names/identifiers above
+
 CREATE
 OR ALTER
 FUNCTION dbo.FN_IsValidUsername(@InputText nvarchar(100)) RETURNS bit
@@ -224,12 +223,14 @@ PRINT 'Created username REGEX validation function.';
 
 GO
 
-/**
-*
-* This function checks an input string to verify its legitimacy as a credit card number
-* It uses both length/regex validations and the Luhn Algorithm (https://www.geeksforgeeks.org/dsa/luhn-algorithm/)
-*
-*/
+/* =====================================
+=    Card Number Validation function   =
+===================================== */
+
+-- ? This function checks an input string to verify its legitimacy as a credit card
+-- ? number It uses both length/regex validations and the Luhn Algorithm
+-- ? (https://www.geeksforgeeks.org/dsa/luhn-algorithm/)
+
 CREATE
 OR ALTER
 FUNCTION dbo.FN_IsValidCardNumber(@InputText varchar(30)) RETURNS bit
@@ -296,17 +297,11 @@ GO
 
 PRINT 'Created identification number validation function.';
 
-/* =====================================
-=     Calculators & other Utilities    =
-===================================== */
-
 GO
 
-/**
-*
-* The file that creates all the schemas that will be populated in the database
-*
-*/
+/* =====================================
+=         Creating the schemas         =
+===================================== */
 
 -- * The User data schema with accounts, profiles, collections, and more
 IF NOT EXISTS (
@@ -365,11 +360,9 @@ PRINT 'Created Reservations Schema.';
 
 GO
 
-/**
-*
-* The creation scripts for all 4 location info tables (location, area, country, and region)
-*
-*/
+/* =====================================
+=      The Location schema tables      =
+===================================== */
 
 -- * Drop them in reverse order of their FK relationships, if needed
 -- * This technically never matters if you are running the PS script, but ordered nonetheless
@@ -378,11 +371,9 @@ DROP TABLE IF EXISTS locations.Area;
 DROP TABLE IF EXISTS locations.Country;
 DROP TABLE IF EXISTS locations.Region;
 
-/**
-*
-* The Region table
-*
-*/
+/* =====================================
+=           The Region table           =
+===================================== */
 
 CREATE TABLE locations.Region (
 
@@ -402,11 +393,9 @@ CREATE TABLE locations.Region (
 
 PRINT 'Created Region table.';
 
-/**
-*
-* The Country table, one step more specific from the Region table
-*
-*/
+/* =====================================
+=          The Country table           =
+===================================== */
 
 CREATE TABLE locations.Country (
 
@@ -432,11 +421,9 @@ CREATE TABLE locations.Country (
 
 PRINT 'Created Country table.';
 
-/**
-*
-* The area table, narrowed within countries
-*
-*/
+/* =====================================
+=            The Area table            =
+===================================== */
 
 CREATE TABLE locations.Area (
 
@@ -465,11 +452,9 @@ CREATE TABLE locations.Area (
 
 PRINT 'Created Area table.';
 
-/**
-*
-* The location table, for specific streets, blocks, or more within the areas
-*
-*/
+/* =====================================
+=     The granular Location table      =
+===================================== */
 
 CREATE TABLE locations.Location (
 
@@ -500,11 +485,9 @@ PRINT 'Created Location table.';
 
 GO
 
-/**
-*
-* The creation script for the Payment Method Type table
-*
-*/
+/* =====================================
+=       Payment Method Type table      =
+===================================== */
 
 DROP TABLE IF EXISTS reservations.PaymentMethodType;
 
@@ -529,11 +512,9 @@ PRINT 'Created Payment Method Type LUT.';
 
 GO
 
-/**
-*
-* The creation script for the User Tiers table.
-*
-*/
+/* =====================================
+=            User Tier LUT             =
+===================================== */
 
 DROP TABLE IF EXISTS users.UserTier;
 
@@ -600,11 +581,9 @@ PRINT 'Created the User Tier LUT.';
 
 GO
 
-/**
-*
-* The creation script for the User Accounts table.
-*
-*/
+/* =====================================
+=          User Account Table          =
+===================================== */
 
 DROP TABLE IF EXISTS users.UserAccount;
 
@@ -695,11 +674,9 @@ PRINT 'Created User Account `ModifiedAt` updating trigger.';
 
 GO
 
-/**
-*
-* The creation script for the User Profile table.
-*
-*/
+/* =====================================
+=          User Profile table          =
+===================================== */
 
 DROP TABLE IF EXISTS users.UserProfile;
 
@@ -786,11 +763,9 @@ PRINT 'Created User Profile `ModifiedAt` updating trigger.';
 
 GO
 
-/**
-*
-* The creation script for the Languages table
-*
-*/
+/* =====================================
+=            Languages LUT             =
+===================================== */
 
 DROP TABLE IF EXISTS users.Languages;
 
@@ -814,11 +789,9 @@ PRINT 'Created Languages LUT.';
 
 GO
 
-/**
-*
-* The creation script for the user-to-languages relationship table, implementing the m:n relationship
-*
-*/
+/* =============================================
+=  Assigned User-Languages relationship table  =
+============================================= */
 
 DROP TABLE IF EXISTS users.UserLanguages;
 
@@ -852,11 +825,9 @@ PRINT 'Created User-Language Relationship table.';
 
 GO
 
-/**
-*
-* The creation script for the User Collections table
-*
-*/
+/* =====================================
+=        User Collections table        =
+===================================== */
 
 DROP TABLE IF EXISTS users.UserCollections;
 
@@ -905,12 +876,12 @@ PRINT 'Created One-Favourites-Collection-Per-User User Collections Table Validat
 
 GO
 
-/**
-*
-* The trigger that inserts a favourites collection into the collections table when
-* a new user joins
-*
-*/
+/* ============================================
+= User Favourites Collection creation trigger =
+============================================ */
+
+-- ? The trigger inserts a favourites collection into the collections table when a new
+-- ? user joins
 
 CREATE TRIGGER users.TR_UserCollection_InsertFavouritesOnUserJoin
 ON users.UserAccount
@@ -940,11 +911,9 @@ END;
 
 GO
 
-/**
-*
-* The creation script for the Billing Addresses table
-*
-*/
+/* =====================================
+=     User Billing Addresses table     =
+===================================== */
 
 DROP TABLE IF EXISTS users.BillingAddress;
 
@@ -982,11 +951,9 @@ PRINT 'Created Billing Address table.';
 
 GO
 
-/**
-*
-* The creation script for the users' Payment Methods table
-*
-*/
+/* =====================================
+=        User Payment Method LUT       =
+===================================== */
 
 DROP TABLE IF EXISTS users.PaymentMethod;
 
@@ -1178,11 +1145,9 @@ PRINT 'Created the Payment Methods table.';
 
 GO
 
-/**
-*
-* The creation script for the card date validation trigger
-*
-*/
+/* =====================================
+=       Card Validation trigger        =
+===================================== */
 
 CREATE TRIGGER users.TR_PaymentMethod_ValidateCardExpiryDate
 ON users.PaymentMethod
@@ -1254,11 +1219,9 @@ PRINT 'Created Card Date Validation trigger.';
 
 GO
 
-/**
-*
-* The creation script for the Property type table
-*
-*/
+/* =====================================
+=         Property Type table          =
+===================================== */
 
 DROP TABLE IF EXISTS properties.PropertyType;
 
@@ -1283,11 +1246,9 @@ PRINT 'Created Property Type LUT.';
 
 GO
 
-/**
-*
-* The creation script for the Property table
-*
-*/
+/* =====================================
+=            Property table            =
+===================================== */
 
 DROP TABLE IF EXISTS properties.Property;
 
@@ -1359,6 +1320,10 @@ PRINT 'Created Property table.';
 
 GO
 
+/* ======================================
+= Property Host tier validation trigger =
+====================================== */
+
 CREATE TRIGGER properties.TR_Property_ValidateHostTier
 ON properties.Property
 AFTER INSERT, UPDATE
@@ -1408,11 +1373,9 @@ PRINT 'Created Property Host tier validation/conversion trigger.';
 
 GO
 
-/**
-*
-* The creation script for the Property Images table
-*
-*/
+/* =====================================
+=        Property Images table         =
+===================================== */
 
 DROP TABLE IF EXISTS properties.PropertyImages;
 
@@ -1453,11 +1416,9 @@ PRINT 'Created Property Images table.';
 
 GO
 
-/**
-*
-* The creation script for the Sector type table
-*
-*/
+/* =====================================
+=      Property Sector Type table      =
+===================================== */
 
 DROP TABLE IF EXISTS properties.SectorType;
 
@@ -1482,11 +1443,9 @@ PRINT 'Created Sector Type LUT.';
 
 GO
 
-/**
-*
-* The creation script for the Property Sectors relationship table
-*
-*/
+/* =====================================
+=        Property Sectors table        =
+===================================== */
 
 DROP TABLE IF EXISTS properties.PropertySectors;
 
@@ -1556,11 +1515,9 @@ PRINT 'Created Property-Sector Relationship table.';
 
 GO
 
-/**
-*
-* The creation script for the Property category table
-*
-*/
+/* =====================================
+=       Property Category table        =
+===================================== */
 
 DROP TABLE IF EXISTS properties.PropertyCategory;
 
@@ -1585,11 +1542,9 @@ PRINT 'Created Property Category LUT.';
 
 GO
 
-/**
-*
-* The creation script for the Property-Category relationship table
-*
-*/
+/* =====================================
+=   Assigned Property Category table   =
+===================================== */
 
 DROP TABLE IF EXISTS properties.AssignedPropertyCategories;
 
@@ -1623,11 +1578,9 @@ PRINT 'Created Assigned Property-Category Relationship table.';
 
 GO
 
-/**
-*
-* The creation script for the Property Attribute type table
-*
-*/
+/* =====================================
+=    Property Attribute Type table     =
+===================================== */
 
 DROP TABLE IF EXISTS properties.AttributeType;
 
@@ -1652,11 +1605,9 @@ PRINT 'Created Property Attribute Type LUT.';
 
 GO
 
-/**
-*
-* The creation script for the Property attribute table
-*
-*/
+/* =====================================
+=       Property Attribute table       =
+===================================== */
 
 DROP TABLE IF EXISTS properties.PropertyAttribute;
 
@@ -1692,11 +1643,9 @@ PRINT 'Created Property Attribute LUT.';
 
 GO
 
-/**
-*
-* The creation script for the Property-Attribute relationship table
-*
-*/
+/* ===============================================
+= Assigned property-attribute relationship table =
+=============================================== */
 
 DROP TABLE IF EXISTS properties.AssignedPropertyAttributes;
 
@@ -1734,11 +1683,9 @@ PRINT 'Created Assigned Property-Attribute Relationship table.';
 
 GO
 
-/**
-*
-* The creation script for the User Collection Properties table
-*
-*/
+/* ====================================================
+=  Properties in User Collections relationship table  =
+==================================================== */
 
 DROP TABLE IF EXISTS users.PropertiesInCollections;
 
@@ -1775,11 +1722,9 @@ PRINT 'Created Assigned Property-Collection Relationship table.';
 
 GO
 
-/**
-*
-* The creation script for the Booking status table
-*
-*/
+/* =====================================
+=          Booking Status LUT          =
+===================================== */
 
 DROP TABLE IF EXISTS reservations.BookingStatus;
 
@@ -1804,11 +1749,9 @@ PRINT 'Created Booking Status LUT.';
 
 GO
 
-/**
-*
-* The creation script for the Payment status table
-*
-*/
+/* =====================================
+=          Payment Status LUT          =
+===================================== */
 
 DROP TABLE IF EXISTS reservations.PaymentStatus;
 
@@ -1833,11 +1776,9 @@ PRINT 'Created Payment Status LUT.';
 
 GO
 
-/**
-*
-* The creation script for the Payment purpose table
-*
-*/
+/* =====================================
+=          Payment Purpose LUT         =
+===================================== */
 
 DROP TABLE IF EXISTS reservations.PaymentPurpose;
 
@@ -1862,11 +1803,9 @@ PRINT 'Created Payment Purpose LUT.';
 
 GO
 
-/**
-*
-* The creation script for the Property Booking table
-*
-*/
+/* =====================================
+=       Property Bookings table        =
+===================================== */
 
 DROP TABLE IF EXISTS reservations.PropertyBookings;
 
@@ -1951,11 +1890,12 @@ PRINT 'Created Property Bookings table.';
 
 GO
 
-/**
-*
-* The trigger that calculates and populates the price info for a booking based on the property pricing
-*
-*/
+/* ========================================
+=  Booking Price info Population trigger  =
+======================================== */
+
+-- ? The trigger calculates and populates the price info for a booking based on the
+-- ? property pricing
 
 CREATE TRIGGER reservations.TR_Bookings_PopulatePriceInfo
 ON reservations.PropertyBookings
@@ -2020,11 +1960,9 @@ PRINT 'Created Booking Price Info population function.';
 
 GO
 
-/**
-*
-* The creation script for the Guest type table
-*
-*/
+/* =====================================
+=           Guest Type table           =
+===================================== */
 
 DROP TABLE IF EXISTS reservations.GuestType;
 
@@ -2049,11 +1987,9 @@ PRINT 'Created Guest Type LUT.';
 
 GO
 
-/**
-*
-* The creation script for the Booking-Guest relationship table
-*
-*/
+/* =====================================
+=   Booking-Guest relationship table   =
+===================================== */
 
 DROP TABLE IF EXISTS reservations.BookingGuests
 
@@ -2089,11 +2025,11 @@ PRINT 'Created Booking-Guests Relationship table.';
 
 GO
 
-/**
-*
-* The creation script for the Payments table, tracking all payments for bookings, installments, refunds, etc.
-*
-*/
+/* =====================================
+=            Payments table            =
+===================================== */
+
+-- ? The Payments table tracks all payments for bookings, installments, refunds, etc.
 
 DROP TABLE IF EXISTS reservations.Payments;
 
@@ -2162,19 +2098,19 @@ CREATE TABLE reservations.Payments (
     CONSTRAINT CHK_NonNegative_PaymentAmount CHECK (PaidAmount >= 0),
 
     -- ? Checks that the payer and payee are not the same user (no money laundering in this database on my watch)
-    CONSTRAINT CHK_Payments_DiffParties CHECK (PayerId != PayeeId)
+    CONSTRAINT CHK_Payments_DiffParties CHECK (PayerId <> PayeeId)
 );
 
 PRINT 'Created Payments table.';
 
 GO
 
-/**
-*
-* The function that calculates the remaining balance to be paid after a newly inputted payment/refund,
-* accounting for the payment type and booking status
-*
-*/
+/* ====================================================
+= Remaining Balance Post-payment Calculation function =
+==================================================== */
+
+-- ? The function calculates the remaining balance to be paid after a newly inputted
+-- ? payment/refund, accounting for the payment type and booking status
 
 CREATE FUNCTION reservations.FN_GetRemainingBalance(
     -- * The associated booking to get the payment information for
@@ -2289,14 +2225,22 @@ PRINT 'Created Remaining Booking Balance Calculation function.';
 
 GO
 
+/* ==============================================
+= Payment Remaining Balance calculation trigger =
+============================================== */
+
 /**
 *
-* The trigger that calculates and populates the remaining balance column in the Payments table on inserting a new payment
-* ! This was originally planned to be a computed column, but unfortunately because I am using a defined function, I could not set it
-* ! as PERSISTED, which meant that this would have to be dynamically calculated on each SELECT. That is definitely not well optimised
-* ! Also, that is why this trigger merely calls the function itself instead of housing the logic - I reused the function above in the trigger
-* ! without having to refactor the whole function to work in a trigger. Also, this allows me to properly/clearly document everything in the function above
+* The trigger calculates and populates the remaining balance column in the Payments
+* table on inserting a new payment
 *
+* ! This was originally planned to be a computed column, but unfortunately because I
+* ! am using a defined function, I could not set it as PERSISTED, which meant that
+* ! this would have to be dynamically calculated on each SELECT. That is definitely not
+* ! well optimised. Also, that is why this trigger merely calls the function itself
+* ! instead of housing the logic - I reused the function above in the trigger without
+* ! having to refactor the whole function to work in a trigger. Also, this allows me to
+* ! properly/clearly document everything in the function above
 */
 
 CREATE TRIGGER reservations.TR_Payments_PopulateRemainingBalance
@@ -2327,11 +2271,9 @@ PRINT 'Created Booking Payment `AmountRemaining` population function.';
 
 GO
 
-/**
-*
-* The creation script for the Property Review table
-*
-*/
+/* =====================================
+=        Property Review table         =
+===================================== */
 
 DROP TABLE IF EXISTS reviews.PropertyReview;
 
@@ -2394,11 +2336,9 @@ PRINT 'Created Property Review (without Total Rating) table.';
 
 GO
 
-/**
-*
-* The creation script for the Review criteria table
-*
-*/
+/* =====================================
+=         Review Criteria LUT          =
+===================================== */
 
 DROP TABLE IF EXISTS reviews.ReviewCriteria;
 
@@ -2433,11 +2373,9 @@ PRINT 'Created Review Criteria LUT.';
 
 GO
 
-/**
-*
-* The creation script for the Criteria Rating relationship table
-*
-*/
+/* ======================================
+=  Criteria Ratings relationship table  =
+====================================== */
 
 DROP TABLE IF EXISTS reviews.CriteriaRatings;
 
@@ -2485,12 +2423,14 @@ GO
 -- ! as it is used in a computed column in that table, but requires these two. That is why it is not in
 -- ! the main functions.sql file
 
-/**
-*
-* This function gathers a total weighted rating for a property based on an associated booking and all
-* the reviewed criteria associated with the booking's review
-*
-*/
+/* ==================================================
+= Total Property Review Rating calculation function =
+================================================== */
+
+-- ? This function gathers a total weighted rating for a property based on an
+-- ? associated booking and all the reviewed criteria associated with the booking's
+-- ? review
+
 CREATE
 OR ALTER
 FUNCTION reviews.FN_TotalPropertyReviewRating(@ReviewId bigint) RETURNS decimal(3, 2)
@@ -2550,11 +2490,9 @@ PRINT 'Added Computed Total Property Review Rating column.';
 
 GO
 
-/**
-*
-* The creation script for the User Review table
-*
-*/
+/* =====================================
+=          User Review table           =
+===================================== */
 
 DROP TABLE IF EXISTS reviews.UserReview;
 
@@ -2606,7 +2544,7 @@ CREATE TABLE reviews.UserReview (
     ),
 
     -- ? Ensures no user is reviewing themselves
-    CONSTRAINT CHK_Valid_UserReviewReviewerTarget CHECK (ReviewerId != TargetId)
+    CONSTRAINT CHK_Valid_UserReviewReviewerTarget CHECK (ReviewerId <> TargetId)
 );
 
 PRINT 'Created User Review table.';

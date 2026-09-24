@@ -28,11 +28,12 @@ CREATE TABLE reservations.PropertyBookings (
     /* Booking Finances
     ===================================== */
 
+    -- ! This was broken down into the 3 separate parts after realising relying on
+    -- ! the frontend for appropriate record keeping, as well as continuous FK
+    -- ! relationships might not be good for records. For example, getting the
+    -- ! financial modifier from the UserId > TierId > Mod is unreliable as the user
+    -- ! might have changed tiers between the booking date and query date
     -- * The base price per night
-    -- ! This was broken down into the 3 separate parts after realising relying on the frontend
-    -- ! for appropriate record keeping, as well as continuous FK relationships might not be good
-    -- ! for records. For example, getting the financial modifier from the UserId > TierId > Mod is unreliable
-    -- ! as the user might have changed tiers between the booking date and query date
     BasePricePerNight        decimal(14, 2) DEFAULT (0) NOT NULL,
 
     -- * The financial modifier applied to this booking
@@ -48,7 +49,8 @@ CREATE TABLE reservations.PropertyBookings (
     -- * The total price per night, with fees
     TotalPricePerNight       decimal(15, 2) DEFAULT (0) NOT NULL,
 
-    -- * The total booking cost, computed from all nightly costs multiplied by the number of nights
+    -- * The total booking cost, computed from all nightly costs multiplied by the
+    -- * number of nights
     TotalBookingCost         decimal(16, 2) DEFAULT (0) NOT NULL,
 
     /* Constraints
@@ -58,8 +60,10 @@ CREATE TABLE reservations.PropertyBookings (
     CONSTRAINT PK_PropertyBookings PRIMARY KEY CLUSTERED (BookingId),
 
     -- * Foreign key constraints for the Property and Booker IDs
-    CONSTRAINT FK_PropertyBooking_User FOREIGN KEY (BookerId) REFERENCES users.UserAccount (UserId),
-    CONSTRAINT FK_PropertyBooking_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId)
+    CONSTRAINT FK_PropertyBooking_User FOREIGN KEY (BookerId)
+    REFERENCES users.UserAccount (UserId),
+    CONSTRAINT FK_PropertyBooking_Property FOREIGN KEY (PropertyId)
+    REFERENCES properties.Property (PropertyId)
     ON UPDATE CASCADE,
 
     -- * Non-negative validations

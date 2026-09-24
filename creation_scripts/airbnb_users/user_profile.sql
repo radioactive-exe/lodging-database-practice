@@ -9,12 +9,15 @@ users.UserProfile (
     /* User ID and public UUID
     ===================================== */
 
-    -- * The internal user ID will be used as the foreign and primary key for this table as well,
-    -- * which should hopefully result in easier searching and a redundant ensuring of a strict 1-to-1 relationship
+    -- * The internal user ID will be used as the foreign and primary key for this
+    -- * table as well, which should hopefully result in easier searching and a
+    -- * redundant ensuring of a strict 1-to-1 relationship
     UserId            bigint NOT NULL UNIQUE,
-    -- * Automatically-populated UUID, which will be used in profile URLs and other public-facing contexts
-    -- ! This was used in place of the original UUID and profile ID setup after more understanding of privacy and UUIDs
-    -- ! Also, instead of using Airbnb's numeric IDs for profile URLs etc., using a UUID is easier to generate
+    -- * Automatically-populated UUID, which will be used in profile URLs and other
+    -- * public-facing contexts.
+    -- ! This was used in place of the original UUID and profile ID setup after more
+    -- ! understanding of privacy and UUIDs. Also, instead of using Airbnb's numeric
+    -- ! IDs for profile URLs etc., using a UUID is easier to generate
     PublicUserUuid    uniqueidentifier DEFAULT NEWID() NOT NULL UNIQUE,
 
     /* Basic Info
@@ -44,11 +47,13 @@ users.UserProfile (
 
     -- * The internal User ID is both the primary and a foreign key
     CONSTRAINT PK_Profile_User PRIMARY KEY CLUSTERED (UserId),
-    CONSTRAINT FK_Profile_User FOREIGN KEY (UserId) REFERENCES users.UserAccount (UserId)
+    CONSTRAINT FK_Profile_User FOREIGN KEY (UserId)
+    REFERENCES users.UserAccount (UserId)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
 
-    -- * Constraints to validate the URLs for the (1) profile pic. and (2) linked social media accounts
+    -- * Constraints to validate the URLs for the (1) profile pic. and (2) linked
+    -- * social media accounts
     -- * (1)
     CONSTRAINT CHK_ValidURL_ProfilePictureUrl CHECK (dbo.FN_IsValidURL(ProfilePictureUrl) = 1),
     -- * (2)

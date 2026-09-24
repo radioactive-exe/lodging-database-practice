@@ -1,3 +1,95 @@
+-- ? Just to make sure we are executing these steps starting from the master database
+USE [master];
+
+-- ? If the Airbnb database already exists, then
+IF
+    EXISTS (
+        SELECT name FROM sys.databases
+        WHERE name = N'Airbnb'
+    )
+    BEGIN
+        -- ? Force close all connections and current uses, such as open windows etc.
+        ALTER DATABASE Airbnb SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+
+        -- ? Drop it completely
+        DROP DATABASE Airbnb;
+    END
+
+PRINT 'Dropped Airbnb database (if it existed).';
+
+GO
+
+-- ? And then recreate it from scratch
+CREATE DATABASE Airbnb;
+
+PRINT 'Created Airbnb database.';
+
+GO
+
+-- ? Switch to the Airbnb database if not already switched
+USE [Airbnb];
+
+/* =====================================
+=         Creating the schemas         =
+===================================== */
+
+-- * The User data schema with accounts, profiles, collections, and more
+IF NOT EXISTS (
+    SELECT name
+    FROM
+        sys.schemas
+    WHERE
+        name = N'users'
+)EXEC ('CREATE SCHEMA users;');
+
+PRINT 'Created User Data Schema.';
+
+-- * The Property data schema with properties, attributes, amenities, and more
+IF NOT EXISTS (
+    SELECT name
+    FROM
+        sys.schemas
+    WHERE
+        name = N'properties'
+)EXEC ('CREATE SCHEMA properties;');
+
+PRINT 'Created Property Data Schema.';
+
+-- * The Reviews schema with ratings and both user and property reviews
+IF NOT EXISTS (
+    SELECT name
+    FROM
+        sys.schemas
+    WHERE
+        name = N'reviews'
+)EXEC ('CREATE SCHEMA reviews;');
+
+PRINT 'Created Reviews Schema';
+
+-- * The Locations data schema, with locations, countries, regions, and more
+IF NOT EXISTS (
+    SELECT name
+    FROM
+        sys.schemas
+    WHERE
+        name = N'locations'
+)EXEC ('CREATE SCHEMA locations;');
+
+PRINT 'Created Location Data Schema.';
+
+-- * The Reservations schema, with invoices, payments, and property bookings
+IF NOT EXISTS (
+    SELECT name
+    FROM
+        sys.schemas
+    WHERE
+        name = N'reservations'
+)EXEC ('CREATE SCHEMA reservations;');
+
+PRINT 'Created Reservations Schema.';
+
+GO
+
 /* =====================================
 =              VALIDATORS              =
 ===================================== */
@@ -6,8 +98,8 @@
 =       URL Validation function        =
 ===================================== */
 
--- ? This function checks an input string according to regular expressions to verify its
--- ? validity as a URL.
+-- ? This function checks an input string according to regular expressions to verify
+-- ? its validity as a URL.
 
 CREATE
 OR ALTER
@@ -15,30 +107,36 @@ FUNCTION dbo.FN_IsValidURL(@InputText nvarchar(4000)) RETURNS bit
 WITH SCHEMABINDING
 AS
 BEGIN
-    -- ? If the input text is null, then it's technically a valid URL.
-    -- ? This takes into account when social accounts are not linked for users, for example,
-    -- ? thus being able to be used as the only constraint for that column, not requiring an
-    -- ? additional `CHECK( x IS NULL OR IsValidUrl(x) = 1)` for each column
+    -- ? If the input text is null, then it's technically a valid URL. ? This takes
+    -- ? into account when social accounts are not linked for users, for example,
+    -- ? thus being able to be used as the only constraint for that column, not
+    -- ? requiring an additional `CHECK( x IS NULL OR IsValidUrl(x) = 1)` for each
+    -- ? column
     IF @InputText IS NULL
         RETURN 1;
 
     -- * The input trimmed from whitespace (copying URLs can sometimes end up with trailing or leading spaces)
     DECLARE @TrimmedInput nvarchar(4000) = TRIM(@InputText);
 
-    -- ? If the input is too long. A limit of 1500 was originally set by Internet Explorer (RIP), but we
-    -- ? use it as a baseline, but we have to drop under 1700 to account for the constraints containing
-    -- ? URLs
+    -- ? If the input is too long. A limit of 1500 was originally set by Internet
+    -- ? Explorer (RIP), but we use it as a baseline, but we have to drop under 1700
+    -- ? to account for the constraints containing URLs
     IF LEN(@TrimmedInput) > 1500
         RETURN 0;
 
     -- * The regular expression that validates urls with either an `http` or an `https` protocol at the beginning
-    DECLARE @URLWithProtocol nvarchar(256) = N'^https?://(www\.)?[a-zA-Z0-9][-a-zA-Z0-9.]*\.[a-zA-Z]{2,6}(/[-a-zA-Z0-9()@:%_+.~#?&/=]*)?$';
+    DECLARE
+        @URLWithProtocol nvarchar(256) = -- noqa: LT03
+        N'^https?://(www\.)?[a-zA-Z0-9][-a-zA-Z0-9.]*\.[a-zA-Z]{2,6}(/[-a-zA-Z0-9()@:%_+.~#?&/=]*)?$';
 
     -- * The regular expression that validates urls without any protocol at the beginning (such as `google.com`)
-    DECLARE @URLWithoutProtocol nvarchar(256) = N'^[a-zA-Z0-9][-a-zA-Z0-9.]*\.[a-zA-Z]{2,6}(/[-a-zA-Z0-9()@:%_+.~#?&/=]*)?$';
+    DECLARE
+        @URLWithoutProtocol nvarchar(256) =
+        N'^[a-zA-Z0-9][-a-zA-Z0-9.]*\.[a-zA-Z]{2,6}(/[-a-zA-Z0-9()@:%_+.~#?&/=]*)?$';
 
     RETURN CASE
-        -- ? If either regex successfully matches against the trimmed input, then it is a valid URL
+        -- ? If either regex successfully matches against the trimmed input, then it
+        -- ? is a valid URL
         WHEN
             REGEXP_LIKE(@TrimmedInput, @URLWithProtocol)
             OR REGEXP_LIKE(@TrimmedInput, @URLWithoutProtocol) THEN 1
@@ -70,9 +168,10 @@ BEGIN
 
     DECLARE @TrimmedInput nvarchar(50) = TRIM(@InputText);
 
-    -- ? Since there is no definite short-circuiting in SQL, check and immediately return if it's too long
-    -- ? The longest phone numbers are 15 (and very rarely 17) numbers long, so this should account
-    -- ? for the country code 00/+, parentheses, and/or dashes
+    -- ? Since there is no definite short-circuiting in SQL, check and immediately
+    -- ? return if it's too long The longest phone numbers are 15 (and very rarely
+    -- ? 17) numbers long, so this should account for the country code 00/+,
+    -- ? parentheses, and/or dashes
     IF LEN(@TrimmedInput) > 22
         RETURN 0;
 
@@ -81,11 +180,14 @@ BEGIN
     -- * 2. Single spaces
     -- * 3. Dashes
     -- * 4. Parentheses
-    DECLARE @InternationalPhoneNumber nvarchar(200) = N'^(?:\+|00)[1-9]\d{0,2}[-.\s]?(?:\(\d{3}\)|\d{3})[-.\s]?(\d[-.\s]?){6,9}\d$';
+    DECLARE
+        @InternationalPhoneNumber nvarchar(200) =
+        N'^(?:\+|00)[1-9]\d{0,2}[-.\s]?(?:\(\d{3}\)|\d{3})[-.\s]?(\d[-.\s]?){6,9}\d$';
 
     RETURN CASE
         WHEN
-            -- ? If the input matches the regular expression, then it's a valid phone number
+            -- ? If the input matches the regular expression,
+            -- ? then it's a valid phone number
             REGEXP_LIKE(@TrimmedInput, @InternationalPhoneNumber) THEN 1
         ELSE 0
     END;
@@ -120,7 +222,9 @@ BEGIN
         RETURN 0;
 
     -- * The regexp that outlines the format of an email address
-    DECLARE @Email nvarchar(200) = N'^[A-Za-z0-9_%+-]+(?:\.[A-Za-z0-9_%+-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$';
+    DECLARE
+        @Email nvarchar(200) =
+        N'^[A-Za-z0-9_%+-]+(?:\.[A-Za-z0-9_%+-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$';
 
     RETURN CASE
         WHEN
@@ -237,36 +341,41 @@ FUNCTION dbo.FN_IsValidCardNumber(@InputText varchar(30)) RETURNS bit
 WITH SCHEMABINDING
 AS
 BEGIN
-    -- * Clears any spaces or hyphens from the inputted sequence (we are still not sure if they are only numeric)
-    -- * but these two characters are okay
+    -- * Clears any spaces or hyphens from the inputted sequence (we are still not
+    -- * sure if they are only numeric) but these two characters are okay
     DECLARE @TrimmedCardNumber varchar(30) = REPLACE(REPLACE(@InputText, ' ', ''), '-', '');
 
-    -- * Other immediate fail conditions, so we don't have to do the complex Luhn algorithm. return false immediately if:
+    -- * Other immediate fail conditions, so we don't have to do the complex Luhn
+    -- * algorithm. return false immediately if:
     IF
         -- ? (1) The input is null, which in this case should not be allowed,
-        -- ? as this would be when entering necessary card details
+        -- ?     as this would be when entering necessary card details
         @TrimmedCardNumber IS NULL
         -- ? (2) There is any non-digit character in the sequence
         OR @TrimmedCardNumber LIKE '%[^0-9]%'
-        -- ? (3) The card number is not between 12-19
-        -- *    Note: While Visa and MC are 15/16, different providers internationally can span between 12 and 19
+        -- ? (3) The card number is not between 12-19 characters long
+        -- * Note: While Visa and MC are 15/16, different providers
+        -- * internationally can span between 12 and 19
         OR LEN(@TrimmedCardNumber) NOT BETWEEN 12 AND 19
         RETURN 0;
 
     -- ~ Now, we need to set up SQL loop.
-    -- ! While in real life this would be handled much easier with a dedicated server written in .NET, Express,
-    -- ! or any other language, or even handled in the frontend, both of those sections are beyond the scope of this
-    -- ! project, so I am doing as much as I can in SQL.
+    -- ! While in real life this would be handled much easier with a dedicated server
+    -- ! written in .NET, Express, ! or any other language, or even handled in the
+    -- ! frontend, both of those sections are beyond the scope of this ! project, so I
+    -- ! am doing as much as I can in SQL.
     -- *                                                     ↓ Here, we start at the last index instead
     DECLARE @Sum int = 0, @Digit int, @ShouldDouble bit = 0, @Index int = LEN(@TrimmedCardNumber);
 
     -- * Loop
     WHILE @Index > 0
         BEGIN
-            -- ? First, extract and cast the digit to an integer so we can perform math on it
+            -- ? First, extract and cast the digit to an integer so we can perform
+            -- ? math on it
             SET @Digit = CAST(SUBSTRING(@TrimmedCardNumber, @Index, 1) AS int);
 
-            -- ? If we are on one of the digits we should double (every second digit from the right)
+            -- ? If we are on one of the digits we should double (every second digit
+            -- ? from the right)
             IF @ShouldDouble = 1
                 BEGIN
                     -- ? Double the digit
@@ -287,7 +396,8 @@ BEGIN
 
     RETURN CASE
         WHEN
-            -- ? If the sum ends in 0 (aka is divisible by 10), then it was a valid number
+            -- ? If the sum ends in 0 (aka is divisible by 10), then it was a valid
+            -- ? number
             @Sum % 10 = 0 THEN 1
         ELSE 0
     END;
@@ -300,72 +410,12 @@ PRINT 'Created identification number validation function.';
 GO
 
 /* =====================================
-=         Creating the schemas         =
-===================================== */
-
--- * The User data schema with accounts, profiles, collections, and more
-IF NOT EXISTS (
-    SELECT name
-    FROM
-        sys.schemas
-    WHERE
-        name = N'users'
-)EXEC ('CREATE SCHEMA users;');
-
-PRINT 'Created User Data Schema.';
-
--- * The Property data schema with properties, attributes, amenities, and more
-IF NOT EXISTS (
-    SELECT name
-    FROM
-        sys.schemas
-    WHERE
-        name = N'properties'
-)EXEC ('CREATE SCHEMA properties;');
-
-PRINT 'Created Property Data Schema.';
-
--- * The Reviews schema with ratings and both user and property reviews
-IF NOT EXISTS (
-    SELECT name
-    FROM
-        sys.schemas
-    WHERE
-        name = N'reviews'
-)EXEC ('CREATE SCHEMA reviews;');
-
-PRINT 'Created Reviews Schema';
-
--- * The Locations data schema, with locations, countries, regions, and more
-IF NOT EXISTS (
-    SELECT name
-    FROM
-        sys.schemas
-    WHERE
-        name = N'locations'
-)EXEC ('CREATE SCHEMA locations;');
-
-PRINT 'Created Location Data Schema.';
-
--- * The Reservations schema, with invoices, payments, and property bookings
-IF NOT EXISTS (
-    SELECT name
-    FROM
-        sys.schemas
-    WHERE
-        name = N'reservations'
-)EXEC ('CREATE SCHEMA reservations;');
-
-PRINT 'Created Reservations Schema.';
-
-GO
-
-/* =====================================
 =      The Location schema tables      =
 ===================================== */
 
 -- * Drop them in reverse order of their FK relationships, if needed
--- * This technically never matters if you are running the PS script, but ordered nonetheless
+-- * This technically never matters if you are running the PS script,
+-- * but ordered nonetheless
 DROP TABLE IF EXISTS locations.Location;
 DROP TABLE IF EXISTS locations.Area;
 DROP TABLE IF EXISTS locations.Country;
@@ -415,7 +465,8 @@ CREATE TABLE locations.Country (
     CONSTRAINT PK_CountryId PRIMARY KEY CLUSTERED (CountryId),
 
     -- * Foreign key constraint for the Region ID this country belongs to
-    CONSTRAINT FK_Country_Region FOREIGN KEY (RegionId) REFERENCES locations.Region (RegionId)
+    CONSTRAINT FK_Country_Region FOREIGN KEY (RegionId)
+    REFERENCES locations.Region (RegionId)
     ON UPDATE CASCADE
 );
 
@@ -446,7 +497,8 @@ CREATE TABLE locations.Area (
     CONSTRAINT PK_AreaId PRIMARY KEY CLUSTERED (AreaId),
 
     -- * Foreign key constraint for the Country ID this area belongs to
-    CONSTRAINT FK_Area_Country FOREIGN KEY (CountryId) REFERENCES locations.Country (CountryId)
+    CONSTRAINT FK_Area_Country FOREIGN KEY (CountryId)
+    REFERENCES locations.Country (CountryId)
     ON UPDATE CASCADE
 );
 
@@ -477,7 +529,8 @@ CREATE TABLE locations.Location (
     CONSTRAINT PK_LocationId PRIMARY KEY CLUSTERED (LocationId),
 
     -- * Foreign key constraint for the Area ID this location belongs to
-    CONSTRAINT FK_Location_Area FOREIGN KEY (AreaId) REFERENCES locations.Area (AreaId)
+    CONSTRAINT FK_Location_Area FOREIGN KEY (AreaId)
+    REFERENCES locations.Area (AreaId)
     ON UPDATE CASCADE
 );
 
@@ -595,22 +648,22 @@ users.UserAccount (
 
     -- * The optimised integer internal ID to be used throughout the database
     -- * Instead of being a UUID, which I discovered is very non-optimised for JOINs
-    -- * and other database FK uses. The UUID is now stored in the public user profile table.
-    -- * Being an Identity item, it starts at 1 and auto increments
+    -- * and other database FK uses. The UUID is now stored in the public user
+    -- * profile table.  Being an Identity item, it starts at 1 and auto increments
     UserId         bigint IDENTITY (1, 1) NOT NULL UNIQUE,
     UserTier       tinyint NOT NULL,
     Email          varchar(50) NOT NULL UNIQUE,
-    -- ? Password is a keyword in SQL Server, and so
-    -- ? an alternative name was used, also indicating the fact that the
-    -- ? stored password is hashed and not raw.
-    -- * The hashing is supposed to be handled by the application layer, so out of this project scope
-    -- * Also, the strength requirements are enforced by the frontend
+
+    -- ? Password is a keyword in SQL Server, and so an alternative name was used,
+    -- ? also indicating the fact that the stored password is hashed and not raw.
+
+    -- * The hashing and strength requirements are assumed to be handled by the
+    -- * frontend/application scope (aka beyond the database)
     HashedPassword varchar(255) NOT NULL,
     PhoneNumber    varchar(30) NOT NULL,
 
     /* Dates and Tracking
     ===================================== */
-    -- * The user's country of residence
 
     -- ! This was originally not in the plan, but as I was writing the test case
     -- ! regarding checking cross-country bookings, I realised that there is no way
@@ -620,6 +673,7 @@ users.UserAccount (
     -- ! being problematic with the fact that users can have multiple billing addresses
     -- ! and payment methods, without a single "primary" one to derive a user's
     -- ! potential address from.
+    -- * The user's country of residence
     UserCountry    smallint NOT NULL,
     -- * Can be null, as the user may have never hosted
     HostingSince   date,
@@ -635,9 +689,11 @@ users.UserAccount (
     CONSTRAINT PK_UserId PRIMARY KEY CLUSTERED (UserId),
 
     -- * The Foreign Key Constraint for the user tier id and user Country
-    CONSTRAINT FK_UserAccount_UserTier FOREIGN KEY (UserTier) REFERENCES users.UserTier (TierId)
+    CONSTRAINT FK_UserAccount_UserTier FOREIGN KEY (UserTier)
+    REFERENCES users.UserTier (TierId)
     ON UPDATE CASCADE,
-    CONSTRAINT FK_UserAccount_Country FOREIGN KEY (UserCountry) REFERENCES locations.Country (CountryId),
+    CONSTRAINT FK_UserAccount_Country FOREIGN KEY (UserCountry)
+    REFERENCES locations.Country (CountryId),
 
     -- ? Checks that the phone number is a valid international number
     CONSTRAINT CHK_Valid_PhoneNumber CHECK (dbo.FN_IsValidPhoneNumber(PhoneNumber) = 1),
@@ -662,7 +718,8 @@ BEGIN
 
     -- ? Merge a row with the updated time into the newly updated row
     UPDATE users.UserAccount
-    -- ? ModifiedAt automatically gets populated with the current time (in UTC, like CreatedAt)
+    -- ? ModifiedAt automatically gets populated with the current time (in UTC, like
+    -- ? CreatedAt)
     SET ModifiedAt = SYSUTCDATETIME()
     FROM users.UserAccount
     INNER JOIN inserted ON (UserAccount.UserId = inserted.UserId);
@@ -685,12 +742,15 @@ users.UserProfile (
     /* User ID and public UUID
     ===================================== */
 
-    -- * The internal user ID will be used as the foreign and primary key for this table as well,
-    -- * which should hopefully result in easier searching and a redundant ensuring of a strict 1-to-1 relationship
+    -- * The internal user ID will be used as the foreign and primary key for this
+    -- * table as well, which should hopefully result in easier searching and a
+    -- * redundant ensuring of a strict 1-to-1 relationship
     UserId            bigint NOT NULL UNIQUE,
-    -- * Automatically-populated UUID, which will be used in profile URLs and other public-facing contexts
-    -- ! This was used in place of the original UUID and profile ID setup after more understanding of privacy and UUIDs
-    -- ! Also, instead of using Airbnb's numeric IDs for profile URLs etc., using a UUID is easier to generate
+    -- * Automatically-populated UUID, which will be used in profile URLs and other
+    -- * public-facing contexts.
+    -- ! This was used in place of the original UUID and profile ID setup after more
+    -- ! understanding of privacy and UUIDs. Also, instead of using Airbnb's numeric
+    -- ! IDs for profile URLs etc., using a UUID is easier to generate
     PublicUserUuid    uniqueidentifier DEFAULT NEWID() NOT NULL UNIQUE,
 
     /* Basic Info
@@ -720,11 +780,13 @@ users.UserProfile (
 
     -- * The internal User ID is both the primary and a foreign key
     CONSTRAINT PK_Profile_User PRIMARY KEY CLUSTERED (UserId),
-    CONSTRAINT FK_Profile_User FOREIGN KEY (UserId) REFERENCES users.UserAccount (UserId)
+    CONSTRAINT FK_Profile_User FOREIGN KEY (UserId)
+    REFERENCES users.UserAccount (UserId)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
 
-    -- * Constraints to validate the URLs for the (1) profile pic. and (2) linked social media accounts
+    -- * Constraints to validate the URLs for the (1) profile pic. and (2) linked
+    -- * social media accounts
     -- * (1)
     CONSTRAINT CHK_ValidURL_ProfilePictureUrl CHECK (dbo.FN_IsValidURL(ProfilePictureUrl) = 1),
     -- * (2)
@@ -810,14 +872,17 @@ CREATE TABLE users.UserLanguages (
     CONSTRAINT PK_UserLang PRIMARY KEY CLUSTERED (UserId, LangId),
 
     -- * The foreign key constraints for both IDs
-    CONSTRAINT FK_UserLang_User FOREIGN KEY (UserId) REFERENCES users.UserAccount (UserId)
+    CONSTRAINT FK_UserLang_User FOREIGN KEY (UserId)
+    REFERENCES users.UserAccount (UserId)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
-    CONSTRAINT FK_UserLang_Lang FOREIGN KEY (LangId) REFERENCES users.Languages (LangId)
+    CONSTRAINT FK_UserLang_Lang FOREIGN KEY (LangId)
+    REFERENCES users.Languages (LangId)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
 
-    -- * The Unique constraint that ensures each each user-language combination only occurs once
+    -- * The Unique constraint that ensures each each user-language combination only
+    -- * occurs once
     CONSTRAINT UQ_User_Lang UNIQUE (UserId, LangId)
 );
 
@@ -857,7 +922,8 @@ CREATE TABLE users.UserCollections (
     CONSTRAINT PK_CollectionId PRIMARY KEY CLUSTERED (CollectionId),
 
     -- * The foreign key constraint for the User/Creator ID of the collection
-    CONSTRAINT FK_Collection_User FOREIGN KEY (CreatorId) REFERENCES users.UserAccount (UserId)
+    CONSTRAINT FK_Collection_User FOREIGN KEY (CreatorId)
+    REFERENCES users.UserAccount (UserId)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
 
@@ -880,8 +946,8 @@ GO
 = User Favourites Collection creation trigger =
 ============================================ */
 
--- ? The trigger inserts a favourites collection into the collections table when a new
--- ? user joins
+-- ? The trigger inserts a favourites collection into the collections table when a
+-- ? new user joins
 
 CREATE TRIGGER users.TR_UserCollection_InsertFavouritesOnUserJoin
 ON users.UserAccount
@@ -932,7 +998,8 @@ CREATE TABLE users.BillingAddress (
     AddressLine1   nvarchar(100) NOT NULL,
     -- * For example, room/floor/building
     AddressLine2   nvarchar(100),
-    -- ? Renamed to include global codes, and made nullable because some countries don't have them at all
+    -- ? Renamed to include global codes, and made nullable because some countries
+    -- ? don't have them at all
     PostalCode     nvarchar(20),
     AddressCountry smallint NOT NULL,
 
@@ -943,7 +1010,8 @@ CREATE TABLE users.BillingAddress (
     CONSTRAINT PK_BillingAddressId PRIMARY KEY CLUSTERED (AddressId),
 
     -- * Foreign key constraint for the Country ID this Billing Address is in
-    CONSTRAINT FK_BillingAddress_Country FOREIGN KEY (AddressCountry) REFERENCES locations.Country (CountryId)
+    CONSTRAINT FK_BillingAddress_Country FOREIGN KEY (AddressCountry)
+    REFERENCES locations.Country (CountryId)
     ON UPDATE CASCADE
 );
 
@@ -952,7 +1020,7 @@ PRINT 'Created Billing Address table.';
 GO
 
 /* =====================================
-=        User Payment Method LUT       =
+=       User Payment Method Table      =
 ===================================== */
 
 DROP TABLE IF EXISTS users.PaymentMethod;
@@ -979,13 +1047,17 @@ CREATE TABLE users.PaymentMethod (
     ===================================== */
 
     -- * Originally, I planned to just include the Cardholder name as one of the fields in
-    -- * credit cards or other types that needed names, and instead take the name based on the OwnerId.
-    -- ! However, I realised that the payment method name can very commonly be different than the account's owner
-    -- ! For example, using a shared credit card with a spouse's name, using a parent's bank account, using a shared
-    -- ! crypto wallet, etc. This was thus split off into a dedicated billing-related name for this purpose.
+    -- * credit cards or other types that needed names, and instead take the name
+    -- * based on the OwnerId.
+    -- ! However, I realised that the payment method name can very commonly be
+    -- ! different than the account's owner For example, using a shared credit card
+    -- ! with a spouse's name, using a parent's bank account, using a shared crypto
+    -- ! wallet, etc. This was thus split off into a dedicated billing-related name for
+    -- ! this purpose.
     BillingName                nvarchar(100) NOT NULL,
 
-    -- * Neutral/multi-purpose fields, the values of which are enforced based on the method type using constraints
+    -- * Neutral/multi-purpose fields, the values of which are enforced based on the
+    -- * method type using constraints
     Field1                     varchar(100),
     Field2                     varchar(100),
     Field3                     varchar(100),
@@ -999,12 +1071,15 @@ CREATE TABLE users.PaymentMethod (
     CONSTRAINT PK_PaymentMethodId PRIMARY KEY CLUSTERED (MethodId),
 
     -- * Foreign key constraint for the payment method type ID
-    CONSTRAINT FK_PaymentMethod_MethodType FOREIGN KEY (MethodType) REFERENCES reservations.PaymentMethodType (TypeId),
+    CONSTRAINT FK_PaymentMethod_MethodType FOREIGN KEY (MethodType)
+    REFERENCES reservations.PaymentMethodType (TypeId),
     -- * Foreign key constraint for the payment method's associated billing address
-    CONSTRAINT FK_PaymentMethod_BillingAddress FOREIGN KEY (BillingAddress) REFERENCES users.BillingAddress (AddressId)
+    CONSTRAINT FK_PaymentMethod_BillingAddress FOREIGN KEY (BillingAddress)
+    REFERENCES users.BillingAddress (AddressId)
     ON UPDATE CASCADE,
     -- * Foreign key constraint for the user who saved/added the payment method
-    CONSTRAINT FK_PaymentMethod_User FOREIGN KEY (OwnerId) REFERENCES users.UserAccount (UserId)
+    CONSTRAINT FK_PaymentMethod_User FOREIGN KEY (OwnerId)
+    REFERENCES users.UserAccount (UserId)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
 
@@ -1014,7 +1089,8 @@ CREATE TABLE users.PaymentMethod (
     /* Type-specific Constraints
     ===================================== */
 
-    -- ? The payment method types will be populated manually, with the following order:
+    -- ? The payment method types will be populated manually, with the following
+    -- ? order:
     -- ?    1 - Card
     -- ?    2 - Digital Wallet (Google/Apple pay)
     -- ?    3 - Paypal/Venmo
@@ -1030,8 +1106,8 @@ CREATE TABLE users.PaymentMethod (
             -- ? Checking the card number
             dbo.FN_IsValidCardNumber(Field1) = 1
 
-            -- ! The month and year are separate both for normal forms and for easier checks
-            -- ! and validation (see trigger below)
+            -- ! The month and year are separate both for normal forms and for easier
+            -- ! checks and validation (see trigger below)
             -- ? Checking the month, 2 digits between 1 and 12 in value (01 = 1, etc.)
             AND REGEXP_LIKE(Field2, '^[0-9]{2}$')
             AND CAST(Field2 AS int) BETWEEN 1 AND 12
@@ -1053,8 +1129,9 @@ CREATE TABLE users.PaymentMethod (
         MethodType <> 2
         -- ? Otherwise, check digital wallet fields
         OR (
-            -- ? Checks the full merchant/payment token (Letters, numbers, underscores, hyphens),
-            -- ? assuming this is handled by the frontend through stripe
+            -- ? Checks the full merchant/payment token (Letters, numbers,
+            -- ? underscores, hyphens), assuming this is handled by the frontend
+            -- ? through stripe
             -- ? (https://gist.github.com/fnky/76f533366f75cf75802c8052b577e2a5?permalink_comment_id=4346671#gistcomment-4346671)
             REGEXP_LIKE(Field1, '^[a-z]{2,5}_[0-9A-Za-z]{8,58}$')
 
@@ -1084,7 +1161,8 @@ CREATE TABLE users.PaymentMethod (
             )
             OR
             (
-            -- ? If it is Venmo, Field1 stores the username (starts with @, allows letters/numbers/hyphens/underscores)
+            -- ? If it is Venmo, Field1 stores the username (starts with @, allows
+            -- ? letters/numbers/hyphens/underscores)
                 Field4 = 'VENMO'
                 AND dbo.FN_IsValidUsername(Field1) = 1
             )
@@ -1101,9 +1179,11 @@ CREATE TABLE users.PaymentMethod (
         -- ? If the method is not a BNPL system, skip
         MethodType <> 4
         OR (
-            -- ? Check the stored/saved token, usually between 30-60 characters with numbers, letters,
-            -- ? hyphens, underscores, and sometimes slashes. Length limits are with padding
-            -- ? eg: (https://documentation.lemonway.com/reference/moneyins_cardwebinitpost)
+            -- ? Check the stored/saved token, usually between 30-60 characters with
+            -- ? numbers, letters, hyphens, underscores, and sometimes slashes.
+            -- ? Length limits are with padding.
+            -- ? eg:
+            -- ? (https://documentation.lemonway.com/reference/moneyins_cardwebinitpost)
             REGEXP_LIKE(Field1, '^[A-Za-z0-9_/-]{10,100}$')
             AND
 
@@ -1122,9 +1202,10 @@ CREATE TABLE users.PaymentMethod (
         -- ? If the method is not a Bank account/transfer location, skip
         MethodType <> 5
         OR (
-            -- ! NOTE: While there are many other bank transfer types in the real world,
-            -- ! I will keep this Bank transfer to a simple IBAN system. Otherwise, there
-            -- ! can be easy checks similar to the Paypal/Venmo options shown above
+            -- ! NOTE: While there are many other bank transfer types in the real
+            -- ! world, I will keep this Bank transfer to a simple IBAN system.
+            -- ! Otherwise, there can be easy checks similar to the Paypal/Venmo
+            -- ! options shown above
             -- ? Checks the IBAN  (https://www.iban.com/structure)
             REGEXP_LIKE(Field1, '^[A-Z]{2}[0-9]{2}[A-Z0-9]{10,30}$')
 
@@ -1186,7 +1267,8 @@ BEGIN
         AND (
             -- ? If the year is before the current one
             ExpiryYear < @CurrentYear
-            -- ? If the year is more than the approximate max year based on the method type
+            -- ? If the year is more than the approximate max year based on the
+            -- ? method type
             OR ExpiryYear > (
                 @CurrentYear + CASE MethodType
                     -- * If it is a card, then usually 3-5 years
@@ -1285,8 +1367,8 @@ CREATE TABLE properties.Property (
     /* Property Location
     ===================================== */
 
-    -- ? Initially planned to be 2 separate fields for Latitude and Longitude,
-    -- ? SQL Server 2025's built-in Geography data type was more efficient
+    -- ? Initially planned to be 2 separate fields for Latitude and Longitude, SQL
+    -- ? Server 2025's built-in Geography data type was more efficient
     Coordinates         geography,
 
     -- * The location ID this property is in
@@ -1303,11 +1385,14 @@ CREATE TABLE properties.Property (
     CONSTRAINT PK_PropertyId PRIMARY KEY CLUSTERED (PropertyId),
 
     -- * Foreign key constraints for the property location, type, and host
-    CONSTRAINT FK_Property_Location FOREIGN KEY (LocationId) REFERENCES locations.Location (LocationId)
+    CONSTRAINT FK_Property_Location FOREIGN KEY (LocationId)
+    REFERENCES locations.Location (LocationId)
     ON UPDATE CASCADE,
-    CONSTRAINT FK_Property_Type FOREIGN KEY (PropertyTypeId) REFERENCES properties.PropertyType (TypeId)
+    CONSTRAINT FK_Property_Type FOREIGN KEY (PropertyTypeId)
+    REFERENCES properties.PropertyType (TypeId)
     ON UPDATE CASCADE,
-    CONSTRAINT FK_Property_Host FOREIGN KEY (HostId) REFERENCES users.UserAccount (UserId)
+    CONSTRAINT FK_Property_Host FOREIGN KEY (HostId)
+    REFERENCES users.UserAccount (UserId)
     ON UPDATE CASCADE,
 
     -- * Nonnegative constraints on fees and prices
@@ -1333,13 +1418,14 @@ BEGIN
     SET NOCOUNT ON;
 
     -- ? Update the host's tier to the host counterpart one level lower than their
-    -- ! current tier, to a minimum of the standard host tier. This is to account for
-    -- ! the host-related milestones that the user has yet to achieve, but still does
-    -- ! not completely disregard their loyalty to the platform as a customer.
-    -- ? This update happens if and only if a row is returned from this query.
-    -- ? This assignment is also one line because we are copying the value from one
-    -- ? column into another based on the filtering at the end of this query
-    -- ? Additionally, populate their HostingSince date
+    -- ? current tier, to a minimum of the standard host tier.
+    -- ! This is to account for the host-related milestones that the user has yet
+    -- ! to achieve, but still does not completely disregard their loyalty to the
+    -- ! platform as a customer.
+    -- ? This update happens if and only if a row is returned from this query. This
+    -- ? assignment is also one line because we are copying the value from one column
+    -- ? into another based on the filtering at the end of this query Additionally,
+    -- ? populate their HostingSince date
     UPDATE UserAccount
     SET
         UserAccount.UserTier = GREATEST(1, HostTierCounterpart.TierId - 1),
@@ -1357,8 +1443,8 @@ BEGIN
     -- ? (1) Where the current user is NOT a host
     WHERE InsertedUserTier.IsHostTier = 0
     -- ? (2) And filtering down to the corresponding host tier so that we can
-    -- ?     directly assign the user the new tier that is the Host counterpart tier
-    -- ?     for their current one
+    -- ?     directly assign the user the new tier that is the Host counterpart
+    -- ?     tier for their current one
     AND HostTierCounterpart.IsHostTier = 1;
 
     -- ? If the above query returns no rows, then there is no host from the inserted
@@ -1392,7 +1478,8 @@ CREATE TABLE properties.PropertyImages (
     -- * The actual URL of the image
     ImageUrl   varchar(1500) NOT NULL,
 
-    -- * The index/order of this image in the gallery/carousel of property images for its property
+    -- * The index/order of this image in the gallery/carousel of property images for
+    -- * its property
     ImageIndex tinyint DEFAULT (0),
 
     /* Constraints
@@ -1402,13 +1489,15 @@ CREATE TABLE properties.PropertyImages (
     CONSTRAINT PK_PropertyImage PRIMARY KEY CLUSTERED (ImageId),
 
     -- * Foreign key constraint for the property ID
-    CONSTRAINT FK_PropertyImage_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId)
+    CONSTRAINT FK_PropertyImage_Property FOREIGN KEY (PropertyId)
+    REFERENCES properties.Property (PropertyId)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
 
     -- * A unique constraint on the property, url, and index columns
-    -- ? This was not in the original plan, but this is now added to ensure
-    -- ? no duplicate image URL gets uploaded in the same position/index for the same property
+    -- ? This was not in the original plan, but this is now added to ensure no
+    -- ? duplicate image URL gets uploaded in the same position/index for the same
+    -- ? property
     CONSTRAINT UQ_Property_Image_Index UNIQUE (PropertyId, ImageUrl, ImageIndex)
 );
 
@@ -1486,9 +1575,11 @@ CREATE TABLE properties.PropertySectors (
     CONSTRAINT PK_SectorId PRIMARY KEY CLUSTERED (SectorId),
 
     -- * Foreign key constraints for the sector type and containing property
-    CONSTRAINT FK_PropertySector_Type FOREIGN KEY (SectorTypeId) REFERENCES properties.SectorType (TypeId)
+    CONSTRAINT FK_PropertySector_Type FOREIGN KEY (SectorTypeId)
+    REFERENCES properties.SectorType (TypeId)
     ON UPDATE CASCADE,
-    CONSTRAINT FK_PropertySector_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId)
+    CONSTRAINT FK_PropertySector_Property FOREIGN KEY (PropertyId)
+    REFERENCES properties.Property (PropertyId)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
 
@@ -1566,10 +1657,12 @@ CREATE TABLE properties.AssignedPropertyCategories (
     CONSTRAINT PK_AssignedPropCat PRIMARY KEY CLUSTERED (PropertyId, CategoryId),
 
     -- * Foreign key constraints for both the property and category IDs
-    CONSTRAINT FK_AssignedPropCat_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId)
+    CONSTRAINT FK_AssignedPropCat_Property FOREIGN KEY (PropertyId)
+    REFERENCES properties.Property (PropertyId)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
-    CONSTRAINT FK_AssignedPropCat_Category FOREIGN KEY (CategoryId) REFERENCES properties.PropertyCategory (CategoryId)
+    CONSTRAINT FK_AssignedPropCat_Category FOREIGN KEY (CategoryId)
+    REFERENCES properties.PropertyCategory (CategoryId)
     ON UPDATE CASCADE
     ON DELETE CASCADE
 );
@@ -1625,7 +1718,8 @@ CREATE TABLE properties.PropertyAttribute (
     AttributeName        varchar(64) NOT NULL UNIQUE,
     AttributeDescription varchar(256),
 
-    -- ? Whether this attribute depends on users, like being a Guest Favourite vs Free Wifi
+    -- ? Whether this attribute depends on users, like being a Guest Favourite vs
+    -- ? Free Wifi
     IsUserBased          bit DEFAULT (0) NOT NULL,
 
     /* Constraints
@@ -1635,7 +1729,8 @@ CREATE TABLE properties.PropertyAttribute (
     CONSTRAINT PK_PropertyAttribute PRIMARY KEY CLUSTERED (AttributeId),
 
     -- * Foreign key constraint for the attribute type
-    CONSTRAINT FK_PropertyAttribute_Type FOREIGN KEY (AttributeTypeId) REFERENCES properties.AttributeType (TypeId)
+    CONSTRAINT FK_PropertyAttribute_Type FOREIGN KEY (AttributeTypeId)
+    REFERENCES properties.AttributeType (TypeId)
     ON UPDATE CASCADE
 );
 
@@ -1660,8 +1755,9 @@ CREATE TABLE properties.AssignedPropertyAttributes (
     -- * The attribute being assigned to the property
     AttributeId smallint NOT NULL,
 
-    -- ? Whether the attribute is notable for this property and so should be outlined/emphasised,
-    -- ? such as being the only property in the area to have Free Parking, etc.
+    -- ? Whether the attribute is notable for this property and so should be
+    -- ? outlined/emphasised, such as being the only property in the area to have
+    -- ? Free Parking, etc.
     IsNotable   bit DEFAULT (0) NOT NULL,
 
     /* Constraints
@@ -1671,10 +1767,12 @@ CREATE TABLE properties.AssignedPropertyAttributes (
     CONSTRAINT PK_AssignedPropAttr PRIMARY KEY CLUSTERED (PropertyId, AttributeId),
 
     -- * Foreign key constraints for both the property and attribute IDs
-    CONSTRAINT FK_AssignedPropAttr_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId)
+    CONSTRAINT FK_AssignedPropAttr_Property FOREIGN KEY (PropertyId)
+    REFERENCES properties.Property (PropertyId)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
-    CONSTRAINT FK_AssignedPropAttr_Attribute FOREIGN KEY (AttributeId) REFERENCES properties.PropertyAttribute (AttributeId)
+    CONSTRAINT FK_AssignedPropAttr_Attribute FOREIGN KEY (AttributeId)
+    REFERENCES properties.PropertyAttribute (AttributeId)
     ON UPDATE CASCADE
     ON DELETE CASCADE
 );
@@ -1706,15 +1804,19 @@ CREATE TABLE users.PropertiesInCollections (
     /* Constraints
     ===================================== */
 
-    -- * Primary key constraint for the three main columns (Collection, User, and Property IDs)
+    -- * Primary key constraint for the three main columns (Collection, User, and
+    -- * Property IDs)
     CONSTRAINT PK_PropertiesInUserCollections PRIMARY KEY CLUSTERED (CollectionId, AddedBy, PropertyId),
 
     -- * Foreign key constraints for the three main columns
-    CONSTRAINT FK_PropertyInCollection_Collection FOREIGN KEY (CollectionId) REFERENCES users.UserCollections (CollectionId)
+    CONSTRAINT FK_PropertyInCollection_Collection FOREIGN KEY (CollectionId)
+    REFERENCES users.UserCollections (CollectionId)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
-    CONSTRAINT FK_PropertyInCollection_User FOREIGN KEY (AddedBy) REFERENCES users.UserAccount (UserId),
-    CONSTRAINT FK_PropertyInCollection_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId)
+    CONSTRAINT FK_PropertyInCollection_User FOREIGN KEY (AddedBy)
+    REFERENCES users.UserAccount (UserId),
+    CONSTRAINT FK_PropertyInCollection_Property FOREIGN KEY (PropertyId)
+    REFERENCES properties.Property (PropertyId)
     ON DELETE CASCADE
 );
 
@@ -1833,11 +1935,12 @@ CREATE TABLE reservations.PropertyBookings (
     /* Booking Finances
     ===================================== */
 
+    -- ! This was broken down into the 3 separate parts after realising relying on
+    -- ! the frontend for appropriate record keeping, as well as continuous FK
+    -- ! relationships might not be good for records. For example, getting the
+    -- ! financial modifier from the UserId > TierId > Mod is unreliable as the user
+    -- ! might have changed tiers between the booking date and query date
     -- * The base price per night
-    -- ! This was broken down into the 3 separate parts after realising relying on the frontend
-    -- ! for appropriate record keeping, as well as continuous FK relationships might not be good
-    -- ! for records. For example, getting the financial modifier from the UserId > TierId > Mod is unreliable
-    -- ! as the user might have changed tiers between the booking date and query date
     BasePricePerNight        decimal(14, 2) DEFAULT (0) NOT NULL,
 
     -- * The financial modifier applied to this booking
@@ -1853,7 +1956,8 @@ CREATE TABLE reservations.PropertyBookings (
     -- * The total price per night, with fees
     TotalPricePerNight       decimal(15, 2) DEFAULT (0) NOT NULL,
 
-    -- * The total booking cost, computed from all nightly costs multiplied by the number of nights
+    -- * The total booking cost, computed from all nightly costs multiplied by the
+    -- * number of nights
     TotalBookingCost         decimal(16, 2) DEFAULT (0) NOT NULL,
 
     /* Constraints
@@ -1863,8 +1967,10 @@ CREATE TABLE reservations.PropertyBookings (
     CONSTRAINT PK_PropertyBookings PRIMARY KEY CLUSTERED (BookingId),
 
     -- * Foreign key constraints for the Property and Booker IDs
-    CONSTRAINT FK_PropertyBooking_User FOREIGN KEY (BookerId) REFERENCES users.UserAccount (UserId),
-    CONSTRAINT FK_PropertyBooking_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId)
+    CONSTRAINT FK_PropertyBooking_User FOREIGN KEY (BookerId)
+    REFERENCES users.UserAccount (UserId),
+    CONSTRAINT FK_PropertyBooking_Property FOREIGN KEY (PropertyId)
+    REFERENCES properties.Property (PropertyId)
     ON UPDATE CASCADE,
 
     -- * Non-negative validations
@@ -2012,10 +2118,12 @@ CREATE TABLE reservations.BookingGuests (
     CONSTRAINT PK_BookingGuests PRIMARY KEY CLUSTERED (BookingId, GuestTypeId),
 
     -- * Foreign key constraints for the booking ID and guest types
-    CONSTRAINT FK_BookingGuests_Booking FOREIGN KEY (BookingId) REFERENCES reservations.PropertyBookings (BookingId)
+    CONSTRAINT FK_BookingGuests_Booking FOREIGN KEY (BookingId)
+    REFERENCES reservations.PropertyBookings (BookingId)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
-    CONSTRAINT FK_BookingGuests_GuestType FOREIGN KEY (GuestTypeId) REFERENCES reservations.GuestType (TypeId)
+    CONSTRAINT FK_BookingGuests_GuestType FOREIGN KEY (GuestTypeId)
+    REFERENCES reservations.GuestType (TypeId)
     ON UPDATE CASCADE,
 
     CONSTRAINT CHK_NonNegative_GuestQuantity CHECK (Quantity >= 0)
@@ -2063,8 +2171,8 @@ CREATE TABLE reservations.Payments (
     -- * The amount paid in this transaction
     PaidAmount       decimal(14, 2) DEFAULT (0) NOT NULL,
 
-    -- ! The columns below were initially not in the plan, but while developing this database's
-    -- ! tables it seemed completely logical to add them
+    -- ! The columns below were initially not in the plan, but while developing this
+    -- ! database's tables it seemed completely logical to add them
 
     -- * The date and time this payment was made on
     PaidOn           datetime2 DEFAULT (SYSUTCDATETIME()) NOT NULL,
@@ -2082,22 +2190,30 @@ CREATE TABLE reservations.Payments (
     CONSTRAINT PK_Payments PRIMARY KEY CLUSTERED (PaymentId),
 
     -- ? The foreign key constraint for the associated booking
-    CONSTRAINT FK_Payments_AssociatedBooking FOREIGN KEY (AssocBookingId) REFERENCES reservations.PropertyBookings (BookingId)
+    CONSTRAINT FK_Payments_AssociatedBooking FOREIGN KEY (AssocBookingId)
+    REFERENCES reservations.PropertyBookings (BookingId)
     ON UPDATE CASCADE,
 
-    -- ? The foreign key constraints for the payment classification (method, purpose, and status)
-    CONSTRAINT FK_Payments_PaymentMethod FOREIGN KEY (PaymentMethodId) REFERENCES users.PaymentMethod (MethodId),
-    CONSTRAINT FK_Payments_PaymentPurpose FOREIGN KEY (PaymentPurposeId) REFERENCES reservations.PaymentPurpose (PurposeId),
-    CONSTRAINT FK_Payments_PaymentStatus FOREIGN KEY (PaymentStatusId) REFERENCES reservations.PaymentStatus (StatusId),
+    -- ? The foreign key constraints for the payment classification (method, purpose,
+    -- ? and status)
+    CONSTRAINT FK_Payments_PaymentMethod FOREIGN KEY (PaymentMethodId)
+    REFERENCES users.PaymentMethod (MethodId),
+    CONSTRAINT FK_Payments_PaymentPurpose FOREIGN KEY (PaymentPurposeId)
+    REFERENCES reservations.PaymentPurpose (PurposeId),
+    CONSTRAINT FK_Payments_PaymentStatus FOREIGN KEY (PaymentStatusId)
+    REFERENCES reservations.PaymentStatus (StatusId),
 
     -- ? The foreign key constraints for the involved users/parties
-    CONSTRAINT FK_Payments_Payer FOREIGN KEY (PayerId) REFERENCES users.UserAccount (UserId),
-    CONSTRAINT FK_Payments_Payee FOREIGN KEY (PayeeId) REFERENCES users.UserAccount (UserId),
+    CONSTRAINT FK_Payments_Payer FOREIGN KEY (PayerId)
+    REFERENCES users.UserAccount (UserId),
+    CONSTRAINT FK_Payments_Payee FOREIGN KEY (PayeeId)
+    REFERENCES users.UserAccount (UserId),
 
     -- ? Validates that the payment amount is non-negative
     CONSTRAINT CHK_NonNegative_PaymentAmount CHECK (PaidAmount >= 0),
 
-    -- ? Checks that the payer and payee are not the same user (no money laundering in this database on my watch)
+    -- ? Checks that the payer and payee are not the same user (no money laundering
+    -- ? in this database on my watch)
     CONSTRAINT CHK_Payments_DiffParties CHECK (PayerId <> PayeeId)
 );
 
@@ -2127,7 +2243,8 @@ BEGIN
     -- * The variable to store the cumulative payment/balance sum for the booking
     DECLARE @CumulativeSum decimal(14, 2);
 
-    -- ? Declaring and populating the associated booking's cost and status (to check if it's cancelled later on)
+    -- ? Declaring and populating the associated booking's cost and status (to check
+    -- ? if it's cancelled later on)
     DECLARE @FullCost decimal(14, 2);
     DECLARE @AssociatedBookingStatus tinyint;
     -- ? Fetch original cost and status
@@ -2142,8 +2259,8 @@ BEGIN
     SELECT @CancelledStatusID = StatusId FROM reservations.BookingStatus
     WHERE StatusName = 'Cancelled';
 
-    -- ? Get and store the defined IDs for payments that add onto the remaining balance
-    -- ? i.e. refunds, security deposits, damages, etc.
+    -- ? Get and store the defined IDs for payments that add onto the remaining
+    -- ? balance – i.e. refunds, security deposits, damages, etc.
     DECLARE @NegativePurposeIds TABLE (
         PurposeId tinyint
     );
@@ -2154,8 +2271,8 @@ BEGIN
         WHERE PurposeName IN ('Refund', 'Additional Charge', 'Security Deposit Claim', 'Tax')
     );
 
-    -- ? Get and store the defined IDs for payments that have no effect on the remaining balance
-    -- ? i.e. host/co-host payouts, commission fees, etc.
+    -- ? Get and store the defined IDs for payments that have no effect on the
+    -- ? remaining balance – i.e. host/co-host payouts, commission fees, etc.
     DECLARE @ZeroingPurposeIds TABLE (
         PurposeId tinyint
     );
@@ -2166,24 +2283,31 @@ BEGIN
         WHERE PurposeName IN ('Payout', 'Co-Host Payout', 'Host Referral Bonus', 'Platform Commission Fee')
     );
 
-    -- ? If the booking we are tracking has been cancelled, then the full cost starting point is now nothing
-    -- ! If there were a cancellation fee implemented in the hypothetical airbnb system we are making, then it would simply be that number
-    -- ! instead of 0 here, or even that percentage * the total cost, etc. But, the same logic applies,
-    -- ? We do this so that if a booking is cancelled and the customer has already paid, the system tracks how much they are owed in refunds
+    -- ? If the booking we are tracking has been cancelled, then the full cost
+    -- ? starting point is now nothing
+    -- ! If there were a cancellation fee implemented in the hypothetical airbnb
+    -- ! system we are making, then it would simply be that number instead of 0 here,
+    -- ! or even that percentage * the total cost, etc. But, the same logic applies,
+    -- ? We do this so that if a booking is cancelled and the customer has already
+    -- ? paid, the system tracks how much they are owed in refunds
     IF (@AssociatedBookingStatus = @CancelledStatusID)
         SET @FullCost = 0;
 
     -- ? Now, we sum up all previous payments (before this new/last one)
     SELECT
         @CumulativeSum = SUM(
-            -- ? Add either the paid amount or subtract it/add its negative if it was a refund/add
+            -- ? Add either the paid amount or subtract it/add its negative if it was
+            -- ? a refund/add
             CASE
-                -- ? The join means that if the isn't null then the payment was of a specific type (i.e. the join returned data)
+                -- ? The join means that if the isn't null then the payment was of a
+                -- ? specific type (i.e. the join returned data)
 
-                -- ? If this is a payment that Increases Balance (Money given back OR extra charges)
+                -- ? If this is a payment that Increases Balance (Money given back OR
+                -- ? extra charges)
                 WHEN NegIds.PurposeId IS NOT NULL THEN -Payments.PaidAmount
 
-                -- ? If this is a payment that has no impact on the balance (such as a host payout)
+                -- ? If this is a payment that has no impact on the balance (such as
+                -- ? a host payout)
                 WHEN ZeroIds.PurposeId IS NOT NULL THEN 0
 
                 ELSE Payments.PaidAmount
@@ -2194,7 +2318,8 @@ BEGIN
     LEFT JOIN @NegativePurposeIds AS NegIds ON Payments.PaymentPurposeId = NegIds.PurposeId
     LEFT JOIN @ZeroingPurposeIds AS ZeroIds ON Payments.PaymentPurposeId = ZeroIds.PurposeId
     WHERE
-        -- ? Make sure to check this booking's records, and those previous to the new one whose trigger is calling this function
+        -- ? Make sure to check this booking's records, and those previous to the new
+        -- ? one whose trigger is calling this function
         Payments.AssocBookingId = @BookingID
         AND Payments.PaymentId < @NewPaymentId;
 
@@ -2203,13 +2328,16 @@ BEGIN
         -- ? Subtract the cumulative paid balance so far (2/3)
         ISNULL(@CumulativeSum, 0)
         + (
-            -- ? And then add (or subtract/add the negative of) the newest payment if needed, and voila
+            -- ? And then add (or subtract/add the negative of) the newest payment if
+            -- ? needed, and voila
             CASE
-                -- ? If this is a payment that Increases Balance (Money given back OR extra charges)
+                -- ? If this is a payment that Increases Balance (Money given back OR
+                -- ? extra charges)
                 WHEN @NewPaymentPurpose IN (SELECT NIds.PurposeId FROM @NegativePurposeIds AS NIds)
                     THEN -@NewPaidAmount
 
-                -- ? If this is a payment that has no impact on the balance (such as )
+                -- ? If this is a payment that has no impact on the balance (such as
+                -- ? a host payout, etc.)
                 WHEN @NewPaymentPurpose IN (SELECT ZIds.PurposeId FROM @ZeroingPurposeIds AS ZIds)
                     THEN 0.00
 
@@ -2284,12 +2412,13 @@ CREATE TABLE reviews.PropertyReview (
 
     ReviewId            bigint IDENTITY (1, 1) NOT NULL,
     -- ! There was also a property id FK that referenced the property being reviewed,
-    -- ! but given that the booking table's row has the property ID, having the property here
-    -- ! as well may violate normal forms, and it introduces another point of error (what if
-    -- ! a different property ID is inserted here from the frontend?).
-    -- ? The specific booking linked with this review
+    -- ! but given that the booking table's row has the property ID, having the
+    -- ! property here as well may violate normal forms, and it introduces another
+    -- ! point of error (what if a different property ID is inserted here from the
+    -- ! frontend?).
+    -- * The specific booking linked with this review
     AssociatedBookingId bigint NOT NULL,
-    -- ? The user making this review
+    -- * The user making this review
     ReviewerId          bigint NOT NULL,
 
     /* Review Content
@@ -2301,20 +2430,23 @@ CREATE TABLE reviews.PropertyReview (
 
     -- ! There is a total rating column in this table that dynamically gets the
     -- ! total rating from fetching data from both CriteriaRatings and ReviewCriteria,
-    -- ! but it is not defined in this script, because –
-    -- ! It ended up proving to be an issue. Here is the issue and my solution:
-    -- ? (1) CriteriaRatings needs PropertyReview to exist as a table before it is created, due to the FK
+    -- ! but it is not defined in this script, because it ended up proving to be an
+    -- ! issue. Here is the issue and my solution:
+    -- ? (1) CriteriaRatings needs PropertyReview to exist as a table before it is
+    -- ?     created, due to the FK
     -- ? (2) PropertyReview has the TotalRating column
-    -- ? (3) The TotalRating is computed from values in CriteriaRatings and ReviewCriteria,
+    -- ? (3) The TotalRating is computed from values in CriteriaRatings and
+    -- ?     ReviewCriteria,
     -- !     and so it needs them both to exist before being created
-    -- ! /!\ I now have a circular dependency, which, while logical, gives me immense trouble in
-    -- !     creating these tables. I thus resorted to this solution in order to keep the schema
-    -- !     and database design as planned:
+    -- ! /!\ I now have a circular dependency, which, while logical, gives me immense
+    -- !     trouble in creating these tables. I thus resorted to this solution
+    -- !     in order to keep the schema and database design as planned:
     -- ? (1) I create the PropertyReview table first, WITHOUT the TotalRating column
-    -- ? (2) Then, I create (ReviewCriteria and) CriteriaRatings, as its ReviewId FK is satisfied
-    -- ?     by the creation of step (1)'s table, and ReviewCriteria is a LUT so that's fine
-    -- ? (3) Lastly, I add the TotalRating column to the PropertyReview table, as now its computation has all
-    -- ?     required tables now created from step (2)
+    -- ? (2) Then, I create (ReviewCriteria and) CriteriaRatings, as its ReviewId FK
+    -- ?     is satisfied by the creation of step (1)'s table, and ReviewCriteria is
+    -- ?     a LUT so that's fine
+    -- ? (3) Lastly, I add the TotalRating column to the PropertyReview table, as now
+    -- ?     its computation has all required tables now created from step (2)
 
     /* Constraints
     ===================================== */
@@ -2323,12 +2455,16 @@ CREATE TABLE reviews.PropertyReview (
     CONSTRAINT PK_PropertyReviewId PRIMARY KEY CLUSTERED (ReviewId),
 
     -- ? Foreign key constraints for the reviewer and booking IDs
-    CONSTRAINT FK_PropertyReview_Booking FOREIGN KEY (AssociatedBookingId) REFERENCES reservations.PropertyBookings (BookingId)
+    CONSTRAINT FK_PropertyReview_Booking FOREIGN KEY (AssociatedBookingId)
+    REFERENCES reservations.PropertyBookings (BookingId)
     ON UPDATE CASCADE,
-    CONSTRAINT FK_PropertyReview_Reviewer FOREIGN KEY (ReviewerId) REFERENCES users.UserAccount (UserId),
+    CONSTRAINT FK_PropertyReview_Reviewer FOREIGN KEY (ReviewerId)
+    REFERENCES users.UserAccount (UserId),
 
-    -- ? Unique constraint for the booking-user-property trio, ensuring a user can't rate a property for a same booking twice (they can edit),
-    -- ? but that is frontend functionality. This constraint was not in the original plan, but it makes sense more now
+    -- ? Unique constraint for the booking-user-property trio, ensuring a user can't
+    -- ? rate a property for a same booking twice (they can edit), but that is
+    -- ? frontend functionality. This constraint was not in the original plan, but it
+    -- ? makes sense more now
     CONSTRAINT UQ_PropertyReview_Booking_Reviewer_Property UNIQUE (AssociatedBookingId, ReviewerId)
 );
 
@@ -2352,7 +2488,8 @@ CREATE TABLE reviews.ReviewCriteria (
     CriterionName         varchar(64) NOT NULL UNIQUE,
     CriterionDescription  varchar(256) NOT NULL,
 
-    -- ? The weight of the individual criterion when compiling an overall property rating from all criteria
+    -- ? The weight of the individual criterion when compiling an overall property
+    -- ? rating from all criteria
     CriterionReviewWeight decimal(4, 2) DEFAULT (1.0) NOT NULL,
 
     /* Constraints
@@ -2397,10 +2534,12 @@ CREATE TABLE reviews.CriteriaRatings (
     CONSTRAINT PK_CriteriaRatings PRIMARY KEY (ReviewId, CriterionId),
 
     -- * Foreign key constraints for the criterion and review IDs
-    CONSTRAINT FK_CriteriaRating_Review FOREIGN KEY (ReviewId) REFERENCES reviews.PropertyReview (ReviewId)
+    CONSTRAINT FK_CriteriaRating_Review FOREIGN KEY (ReviewId)
+    REFERENCES reviews.PropertyReview (ReviewId)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
-    CONSTRAINT FK_CriteriaRating_Criterion FOREIGN KEY (CriterionId) REFERENCES reviews.ReviewCriteria (CriterionId)
+    CONSTRAINT FK_CriteriaRating_Criterion FOREIGN KEY (CriterionId)
+    REFERENCES reviews.ReviewCriteria (CriterionId)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
 
@@ -2410,7 +2549,8 @@ CREATE TABLE reviews.CriteriaRatings (
         Rating >= 0
         AND Rating <= 5
 
-        -- ? Divisible by half (i.e., either a whole star/rating or a half star/rating, like 2 and 2.5)
+        -- ? Divisible by half (i.e., either a whole star/rating or a half
+        -- ? star/rating, like 2 and 2.5)
         AND (Rating % 0.5 = 0)
     )
 );
@@ -2419,9 +2559,9 @@ PRINT 'Created Criteria-Rating Relationship table.';
 
 GO
 
--- ! This function has to be put here (after these two tables, but before the property review table)
--- ! as it is used in a computed column in that table, but requires these two. That is why it is not in
--- ! the main functions.sql file
+-- ! This function has to be put here (after these two tables, but before the
+-- ! property review table) as it is used in a computed column in that table, but
+-- ! requires these two. That is why it is not in the main functions.sql file
 
 /* ==================================================
 = Total Property Review Rating calculation function =
@@ -2437,9 +2577,11 @@ FUNCTION reviews.FN_TotalPropertyReviewRating(@ReviewId bigint) RETURNS decimal(
 AS
 BEGIN
     RETURN (
-        -- ? We select and use aggregate functions to calculate the total review score for all the ratings
+        -- ? We select and use aggregate functions to calculate the total review
+        -- ? score for all the ratings
         SELECT
-            -- ? If the result is null - i.e. a column failed to return something or the NULLIF created a NULL, then (1/2)
+            -- ? If the result is null - i.e. a column failed to return something or
+            -- ? the NULLIF created a NULL, then (1/2)
             ISNULL(
                 -- ? Cast to ensure we are returning the proper type
                 CAST(
@@ -2447,9 +2589,11 @@ BEGIN
                     SUM(Ratings.Rating * Criteria.CriterionReviewWeight)
 
                     -- ? Divide by the sum of all weights.
-                    -- ! We use a NULLIF here so the program doesn't crash if we somehow have a NULL criterion review weight
-                    -- ! for example if the criterion ID somehow breaks, etc. by attempting to divide by 0. NULL above is
-                    -- ! dealt with easily, but not here
+
+                    -- ! We use a NULLIF here so the program doesn't crash if we
+                    -- ! somehow have a NULL criterion review weight for example if
+                    -- ! the criterion ID somehow breaks, etc. by attempting to divide
+                    -- ! by 0. NULL above is dealt with easily, but not here
                     / SUM(NULLIF(Criteria.CriterionReviewWeight, 0.0))
 
                     AS decimal(3, 2)
@@ -2480,9 +2624,10 @@ ALTER TABLE reviews.PropertyReview
 ADD
 -- ? The derived and weighted total rating for the property linked with a particular booking
 TotalRating AS reviews.FN_TotalPropertyReviewRating(ReviewId);
--- ? We cannot add a CHECK constraint to clamp the Total rating, as it is a non-persisted computed column,
--- ? but given that the values used in the original ratings are limited between 0 and 5, then the
--- ? calculation will automatically be within that range, so that helps with the Limitation
+-- ? We cannot add a CHECK constraint to clamp the Total rating, as it is a
+-- ? non-persisted computed column, but given that the values used in the original
+-- ? ratings are limited between 0 and 5, then the calculation will automatically be
+-- ? within that range, so that helps with the Limitation
 
 GO
 
@@ -2524,13 +2669,18 @@ CREATE TABLE reviews.UserReview (
     CONSTRAINT PK_UserReviewId PRIMARY KEY CLUSTERED (ReviewId),
 
     -- ? Foreign key constraints for the property, reviewer, and booking IDs
-    CONSTRAINT FK_UserReview_Target FOREIGN KEY (TargetId) REFERENCES users.UserAccount (UserId),
-    CONSTRAINT FK_UserReview_Reviewer FOREIGN KEY (ReviewerId) REFERENCES users.UserAccount (UserId)
+    CONSTRAINT FK_UserReview_Target FOREIGN KEY (TargetId)
+    REFERENCES users.UserAccount (UserId),
+    CONSTRAINT FK_UserReview_Reviewer FOREIGN KEY (ReviewerId)
+    REFERENCES users.UserAccount (UserId)
     ON UPDATE CASCADE,
-    CONSTRAINT FK_UserReview_Booking FOREIGN KEY (AssociatedBookingId) REFERENCES reservations.PropertyBookings (BookingId),
+    CONSTRAINT FK_UserReview_Booking FOREIGN KEY (AssociatedBookingId)
+    REFERENCES reservations.PropertyBookings (BookingId),
 
-    -- ? Unique constraint for the booking-user-target trio, ensuring a user can't rate a host for a same booking twice (they can edit),
-    -- ? but that is frontend functionality. This constraint was not in the original plan, but it makes sense more now
+    -- ? Unique constraint for the booking-user-target trio, ensuring a user can't
+    -- ? rate a host for a same booking twice (they can edit), but that is frontend
+    -- ? functionality. This constraint was not in the original plan, but it makes
+    -- ? sense more now
     CONSTRAINT UQ_UserReview_Booking_Reviewer_Target UNIQUE (TargetId, ReviewerId, AssociatedBookingId),
 
     -- ? Checks the range and value of the rating
@@ -2539,7 +2689,8 @@ CREATE TABLE reviews.UserReview (
         Rating >= 0
         AND Rating <= 5
 
-        -- ? And the rating is divisible by half (either a whole number or half, like 2 or 2.5)
+        -- ? And the rating is divisible by half (either a whole number or half, like
+        -- ? 2 or 2.5)
         AND Rating % 0.5 = 0
     ),
 

@@ -1,4 +1,4 @@
-# ~ These are the defaults for my docker setup while developing, and I will prompt you, the professor, to enter your database configuration and address for these SQL files to run in
+# ~ These are the defaults for my docker setup while developing, and I will prompt you, to enter your database configuration and address for these SQL files to run in
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '')]
 param (
     [string]$ServerInstance,
@@ -84,20 +84,6 @@ else {
     Write-Host "SQLServer module already imported." -ForegroundColor Green;
 }
 
-# ! Here, the Airbnb database gets wiped and recreated, and then we switch the focus/commands to it
-Write-Host "`nWiping and Recreating Airbnb Database, then switching to it if not switched" -ForegroundColor Cyan
-try {
-    # ? The db.sql file gets executed (with its path resolved), wiping and recreating the database
-    Invoke-Sqlcmd @SqlArgs -InputFile (Join-Path -Path $PSScriptRoot -ChildPath "creation_scripts/db.sql") -Verbose
-    Write-Host "Airbnb Database recreated" -ForegroundColor Green
-    # ? Switching to the newly created database
-    $SqlArgs["Database"] = "Airbnb"
-}
-catch {
-    Write-Host "Failed to rebuild database workspace. Error Details: $_" -ForegroundColor Red
-    Exit
-}
-
 # ? The array, in order, of all the sql files that need to be run to rebuild the database
 $DatabaseCreationFiles = @(
 
@@ -105,16 +91,17 @@ $DatabaseCreationFiles = @(
     =        Creating the Database         =
     ===================================== #>
 
-
-    <# Functions and pre-tables
-    ===================================== #>
-
-    "utils/functions.sql",
+    "creation_scripts/db.sql",
 
     <# Schemas
     ===================================== #>
 
     "creation_scripts/schemas.sql",
+
+    <# Functions and pre-tables
+    ===================================== #>
+
+    "utils/functions.sql",
 
     <# Location schema tables
     ===================================== #>
@@ -206,13 +193,15 @@ foreach ($file in $DatabaseCreationFiles) {
 # ? Clear the file of its current contents (if any)
 Clear-Content -Path "packaged/database_population.sql" -ErrorAction SilentlyContinue
 
+# ? Ensure the population file starts by switching to the Airbnb database
+"USE [Airbnb];`n" + (Get-Content "packaged/database_population.sql") | Set-Content "packaged/database_population.sql"
+
 # ? Cycle through the files
 foreach ($file in $DatabasePopulationFiles) {
     # ? And compile them into one file with a GO batch delimiter and a blank line between them
     Get-Content -Path $file | Add-Content -Path "packaged/database_population.sql"
     "`nGO`n" | Add-Content -Path "packaged/database_population.sql"
 }
-
 
 $PackagedFiles = @(
     "packaged/database_creation.sql",

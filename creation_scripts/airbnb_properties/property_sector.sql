@@ -68,9 +68,11 @@ CREATE TABLE properties.PropertySectors (
     CONSTRAINT PK_SectorId PRIMARY KEY CLUSTERED (SectorId),
 
     -- * Foreign key constraints for the sector type and containing property
-    CONSTRAINT FK_PropertySector_Type FOREIGN KEY (SectorTypeId) REFERENCES properties.SectorType (TypeId)
+    CONSTRAINT FK_PropertySector_Type FOREIGN KEY (SectorTypeId)
+    REFERENCES properties.SectorType (TypeId)
     ON UPDATE CASCADE,
-    CONSTRAINT FK_PropertySector_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId)
+    CONSTRAINT FK_PropertySector_Property FOREIGN KEY (PropertyId)
+    REFERENCES properties.Property (PropertyId)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
 

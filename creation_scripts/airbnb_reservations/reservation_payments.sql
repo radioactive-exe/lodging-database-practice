@@ -36,8 +36,8 @@ CREATE TABLE reservations.Payments (
     -- * The amount paid in this transaction
     PaidAmount       decimal(14, 2) DEFAULT (0) NOT NULL,
 
-    -- ! The columns below were initially not in the plan, but while developing this database's
-    -- ! tables it seemed completely logical to add them
+    -- ! The columns below were initially not in the plan, but while developing this
+    -- ! database's tables it seemed completely logical to add them
 
     -- * The date and time this payment was made on
     PaidOn           datetime2 DEFAULT (SYSUTCDATETIME()) NOT NULL,
@@ -55,22 +55,30 @@ CREATE TABLE reservations.Payments (
     CONSTRAINT PK_Payments PRIMARY KEY CLUSTERED (PaymentId),
 
     -- ? The foreign key constraint for the associated booking
-    CONSTRAINT FK_Payments_AssociatedBooking FOREIGN KEY (AssocBookingId) REFERENCES reservations.PropertyBookings (BookingId)
+    CONSTRAINT FK_Payments_AssociatedBooking FOREIGN KEY (AssocBookingId)
+    REFERENCES reservations.PropertyBookings (BookingId)
     ON UPDATE CASCADE,
 
-    -- ? The foreign key constraints for the payment classification (method, purpose, and status)
-    CONSTRAINT FK_Payments_PaymentMethod FOREIGN KEY (PaymentMethodId) REFERENCES users.PaymentMethod (MethodId),
-    CONSTRAINT FK_Payments_PaymentPurpose FOREIGN KEY (PaymentPurposeId) REFERENCES reservations.PaymentPurpose (PurposeId),
-    CONSTRAINT FK_Payments_PaymentStatus FOREIGN KEY (PaymentStatusId) REFERENCES reservations.PaymentStatus (StatusId),
+    -- ? The foreign key constraints for the payment classification (method, purpose,
+    -- ? and status)
+    CONSTRAINT FK_Payments_PaymentMethod FOREIGN KEY (PaymentMethodId)
+    REFERENCES users.PaymentMethod (MethodId),
+    CONSTRAINT FK_Payments_PaymentPurpose FOREIGN KEY (PaymentPurposeId)
+    REFERENCES reservations.PaymentPurpose (PurposeId),
+    CONSTRAINT FK_Payments_PaymentStatus FOREIGN KEY (PaymentStatusId)
+    REFERENCES reservations.PaymentStatus (StatusId),
 
     -- ? The foreign key constraints for the involved users/parties
-    CONSTRAINT FK_Payments_Payer FOREIGN KEY (PayerId) REFERENCES users.UserAccount (UserId),
-    CONSTRAINT FK_Payments_Payee FOREIGN KEY (PayeeId) REFERENCES users.UserAccount (UserId),
+    CONSTRAINT FK_Payments_Payer FOREIGN KEY (PayerId)
+    REFERENCES users.UserAccount (UserId),
+    CONSTRAINT FK_Payments_Payee FOREIGN KEY (PayeeId)
+    REFERENCES users.UserAccount (UserId),
 
     -- ? Validates that the payment amount is non-negative
     CONSTRAINT CHK_NonNegative_PaymentAmount CHECK (PaidAmount >= 0),
 
-    -- ? Checks that the payer and payee are not the same user (no money laundering in this database on my watch)
+    -- ? Checks that the payer and payee are not the same user (no money laundering
+    -- ? in this database on my watch)
     CONSTRAINT CHK_Payments_DiffParties CHECK (PayerId <> PayeeId)
 );
 
@@ -100,7 +108,8 @@ BEGIN
     -- * The variable to store the cumulative payment/balance sum for the booking
     DECLARE @CumulativeSum decimal(14, 2);
 
-    -- ? Declaring and populating the associated booking's cost and status (to check if it's cancelled later on)
+    -- ? Declaring and populating the associated booking's cost and status (to check
+    -- ? if it's cancelled later on)
     DECLARE @FullCost decimal(14, 2);
     DECLARE @AssociatedBookingStatus tinyint;
     -- ? Fetch original cost and status
@@ -115,8 +124,8 @@ BEGIN
     SELECT @CancelledStatusID = StatusId FROM reservations.BookingStatus
     WHERE StatusName = 'Cancelled';
 
-    -- ? Get and store the defined IDs for payments that add onto the remaining balance
-    -- ? i.e. refunds, security deposits, damages, etc.
+    -- ? Get and store the defined IDs for payments that add onto the remaining
+    -- ? balance – i.e. refunds, security deposits, damages, etc.
     DECLARE @NegativePurposeIds TABLE (
         PurposeId tinyint
     );
@@ -127,8 +136,8 @@ BEGIN
         WHERE PurposeName IN ('Refund', 'Additional Charge', 'Security Deposit Claim', 'Tax')
     );
 
-    -- ? Get and store the defined IDs for payments that have no effect on the remaining balance
-    -- ? i.e. host/co-host payouts, commission fees, etc.
+    -- ? Get and store the defined IDs for payments that have no effect on the
+    -- ? remaining balance – i.e. host/co-host payouts, commission fees, etc.
     DECLARE @ZeroingPurposeIds TABLE (
         PurposeId tinyint
     );
@@ -139,24 +148,31 @@ BEGIN
         WHERE PurposeName IN ('Payout', 'Co-Host Payout', 'Host Referral Bonus', 'Platform Commission Fee')
     );
 
-    -- ? If the booking we are tracking has been cancelled, then the full cost starting point is now nothing
-    -- ! If there were a cancellation fee implemented in the hypothetical airbnb system we are making, then it would simply be that number
-    -- ! instead of 0 here, or even that percentage * the total cost, etc. But, the same logic applies,
-    -- ? We do this so that if a booking is cancelled and the customer has already paid, the system tracks how much they are owed in refunds
+    -- ? If the booking we are tracking has been cancelled, then the full cost
+    -- ? starting point is now nothing
+    -- ! If there were a cancellation fee implemented in the hypothetical airbnb
+    -- ! system we are making, then it would simply be that number instead of 0 here,
+    -- ! or even that percentage * the total cost, etc. But, the same logic applies,
+    -- ? We do this so that if a booking is cancelled and the customer has already
+    -- ? paid, the system tracks how much they are owed in refunds
     IF (@AssociatedBookingStatus = @CancelledStatusID)
         SET @FullCost = 0;
 
     -- ? Now, we sum up all previous payments (before this new/last one)
     SELECT
         @CumulativeSum = SUM(
-            -- ? Add either the paid amount or subtract it/add its negative if it was a refund/add
+            -- ? Add either the paid amount or subtract it/add its negative if it was
+            -- ? a refund/add
             CASE
-                -- ? The join means that if the isn't null then the payment was of a specific type (i.e. the join returned data)
+                -- ? The join means that if the isn't null then the payment was of a
+                -- ? specific type (i.e. the join returned data)
 
-                -- ? If this is a payment that Increases Balance (Money given back OR extra charges)
+                -- ? If this is a payment that Increases Balance (Money given back OR
+                -- ? extra charges)
                 WHEN NegIds.PurposeId IS NOT NULL THEN -Payments.PaidAmount
 
-                -- ? If this is a payment that has no impact on the balance (such as a host payout)
+                -- ? If this is a payment that has no impact on the balance (such as
+                -- ? a host payout)
                 WHEN ZeroIds.PurposeId IS NOT NULL THEN 0
 
                 ELSE Payments.PaidAmount
@@ -167,7 +183,8 @@ BEGIN
     LEFT JOIN @NegativePurposeIds AS NegIds ON Payments.PaymentPurposeId = NegIds.PurposeId
     LEFT JOIN @ZeroingPurposeIds AS ZeroIds ON Payments.PaymentPurposeId = ZeroIds.PurposeId
     WHERE
-        -- ? Make sure to check this booking's records, and those previous to the new one whose trigger is calling this function
+        -- ? Make sure to check this booking's records, and those previous to the new
+        -- ? one whose trigger is calling this function
         Payments.AssocBookingId = @BookingID
         AND Payments.PaymentId < @NewPaymentId;
 
@@ -176,13 +193,16 @@ BEGIN
         -- ? Subtract the cumulative paid balance so far (2/3)
         ISNULL(@CumulativeSum, 0)
         + (
-            -- ? And then add (or subtract/add the negative of) the newest payment if needed, and voila
+            -- ? And then add (or subtract/add the negative of) the newest payment if
+            -- ? needed, and voila
             CASE
-                -- ? If this is a payment that Increases Balance (Money given back OR extra charges)
+                -- ? If this is a payment that Increases Balance (Money given back OR
+                -- ? extra charges)
                 WHEN @NewPaymentPurpose IN (SELECT NIds.PurposeId FROM @NegativePurposeIds AS NIds)
                     THEN -@NewPaidAmount
 
-                -- ? If this is a payment that has no impact on the balance (such as )
+                -- ? If this is a payment that has no impact on the balance (such as
+                -- ? a host payout, etc.)
                 WHEN @NewPaymentPurpose IN (SELECT ZIds.PurposeId FROM @ZeroingPurposeIds AS ZIds)
                     THEN 0.00
 

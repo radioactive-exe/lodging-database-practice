@@ -37,8 +37,8 @@ CREATE TABLE properties.Property (
     /* Property Location
     ===================================== */
 
-    -- ? Initially planned to be 2 separate fields for Latitude and Longitude,
-    -- ? SQL Server 2025's built-in Geography data type was more efficient
+    -- ? Initially planned to be 2 separate fields for Latitude and Longitude, SQL
+    -- ? Server 2025's built-in Geography data type was more efficient
     Coordinates         geography,
 
     -- * The location ID this property is in
@@ -55,11 +55,14 @@ CREATE TABLE properties.Property (
     CONSTRAINT PK_PropertyId PRIMARY KEY CLUSTERED (PropertyId),
 
     -- * Foreign key constraints for the property location, type, and host
-    CONSTRAINT FK_Property_Location FOREIGN KEY (LocationId) REFERENCES locations.Location (LocationId)
+    CONSTRAINT FK_Property_Location FOREIGN KEY (LocationId)
+    REFERENCES locations.Location (LocationId)
     ON UPDATE CASCADE,
-    CONSTRAINT FK_Property_Type FOREIGN KEY (PropertyTypeId) REFERENCES properties.PropertyType (TypeId)
+    CONSTRAINT FK_Property_Type FOREIGN KEY (PropertyTypeId)
+    REFERENCES properties.PropertyType (TypeId)
     ON UPDATE CASCADE,
-    CONSTRAINT FK_Property_Host FOREIGN KEY (HostId) REFERENCES users.UserAccount (UserId)
+    CONSTRAINT FK_Property_Host FOREIGN KEY (HostId)
+    REFERENCES users.UserAccount (UserId)
     ON UPDATE CASCADE,
 
     -- * Nonnegative constraints on fees and prices
@@ -85,13 +88,14 @@ BEGIN
     SET NOCOUNT ON;
 
     -- ? Update the host's tier to the host counterpart one level lower than their
-    -- ! current tier, to a minimum of the standard host tier. This is to account for
-    -- ! the host-related milestones that the user has yet to achieve, but still does
-    -- ! not completely disregard their loyalty to the platform as a customer.
-    -- ? This update happens if and only if a row is returned from this query.
-    -- ? This assignment is also one line because we are copying the value from one
-    -- ? column into another based on the filtering at the end of this query
-    -- ? Additionally, populate their HostingSince date
+    -- ? current tier, to a minimum of the standard host tier.
+    -- ! This is to account for the host-related milestones that the user has yet
+    -- ! to achieve, but still does not completely disregard their loyalty to the
+    -- ! platform as a customer.
+    -- ? This update happens if and only if a row is returned from this query. This
+    -- ? assignment is also one line because we are copying the value from one column
+    -- ? into another based on the filtering at the end of this query Additionally,
+    -- ? populate their HostingSince date
     UPDATE UserAccount
     SET
         UserAccount.UserTier = GREATEST(1, HostTierCounterpart.TierId - 1),
@@ -109,8 +113,8 @@ BEGIN
     -- ? (1) Where the current user is NOT a host
     WHERE InsertedUserTier.IsHostTier = 0
     -- ? (2) And filtering down to the corresponding host tier so that we can
-    -- ?     directly assign the user the new tier that is the Host counterpart tier
-    -- ?     for their current one
+    -- ?     directly assign the user the new tier that is the Host counterpart
+    -- ?     tier for their current one
     AND HostTierCounterpart.IsHostTier = 1;
 
     -- ? If the above query returns no rows, then there is no host from the inserted

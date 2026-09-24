@@ -32,13 +32,18 @@ CREATE TABLE reviews.UserReview (
     CONSTRAINT PK_UserReviewId PRIMARY KEY CLUSTERED (ReviewId),
 
     -- ? Foreign key constraints for the property, reviewer, and booking IDs
-    CONSTRAINT FK_UserReview_Target FOREIGN KEY (TargetId) REFERENCES users.UserAccount (UserId),
-    CONSTRAINT FK_UserReview_Reviewer FOREIGN KEY (ReviewerId) REFERENCES users.UserAccount (UserId)
+    CONSTRAINT FK_UserReview_Target FOREIGN KEY (TargetId)
+    REFERENCES users.UserAccount (UserId),
+    CONSTRAINT FK_UserReview_Reviewer FOREIGN KEY (ReviewerId)
+    REFERENCES users.UserAccount (UserId)
     ON UPDATE CASCADE,
-    CONSTRAINT FK_UserReview_Booking FOREIGN KEY (AssociatedBookingId) REFERENCES reservations.PropertyBookings (BookingId),
+    CONSTRAINT FK_UserReview_Booking FOREIGN KEY (AssociatedBookingId)
+    REFERENCES reservations.PropertyBookings (BookingId),
 
-    -- ? Unique constraint for the booking-user-target trio, ensuring a user can't rate a host for a same booking twice (they can edit),
-    -- ? but that is frontend functionality. This constraint was not in the original plan, but it makes sense more now
+    -- ? Unique constraint for the booking-user-target trio, ensuring a user can't
+    -- ? rate a host for a same booking twice (they can edit), but that is frontend
+    -- ? functionality. This constraint was not in the original plan, but it makes
+    -- ? sense more now
     CONSTRAINT UQ_UserReview_Booking_Reviewer_Target UNIQUE (TargetId, ReviewerId, AssociatedBookingId),
 
     -- ? Checks the range and value of the rating
@@ -47,7 +52,8 @@ CREATE TABLE reviews.UserReview (
         Rating >= 0
         AND Rating <= 5
 
-        -- ? And the rating is divisible by half (either a whole number or half, like 2 or 2.5)
+        -- ? And the rating is divisible by half (either a whole number or half, like
+        -- ? 2 or 2.5)
         AND Rating % 0.5 = 0
     ),
 

@@ -21,15 +21,19 @@ CREATE TABLE users.PropertiesInCollections (
     /* Constraints
     ===================================== */
 
-    -- * Primary key constraint for the three main columns (Collection, User, and Property IDs)
+    -- * Primary key constraint for the three main columns (Collection, User, and
+    -- * Property IDs)
     CONSTRAINT PK_PropertiesInUserCollections PRIMARY KEY CLUSTERED (CollectionId, AddedBy, PropertyId),
 
     -- * Foreign key constraints for the three main columns
-    CONSTRAINT FK_PropertyInCollection_Collection FOREIGN KEY (CollectionId) REFERENCES users.UserCollections (CollectionId)
+    CONSTRAINT FK_PropertyInCollection_Collection FOREIGN KEY (CollectionId)
+    REFERENCES users.UserCollections (CollectionId)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
-    CONSTRAINT FK_PropertyInCollection_User FOREIGN KEY (AddedBy) REFERENCES users.UserAccount (UserId),
-    CONSTRAINT FK_PropertyInCollection_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId)
+    CONSTRAINT FK_PropertyInCollection_User FOREIGN KEY (AddedBy)
+    REFERENCES users.UserAccount (UserId),
+    CONSTRAINT FK_PropertyInCollection_Property FOREIGN KEY (PropertyId)
+    REFERENCES properties.Property (PropertyId)
     ON DELETE CASCADE
 );
 

@@ -1,3 +1,5 @@
+USE [Airbnb];
+
 -- ? Unneeded response of rows affected
 SET NOCOUNT ON;
 

@@ -3,7 +3,8 @@
 ===================================== */
 
 -- * Drop them in reverse order of their FK relationships, if needed
--- * This technically never matters if you are running the PS script, but ordered nonetheless
+-- * This technically never matters if you are running the PS script,
+-- * but ordered nonetheless
 DROP TABLE IF EXISTS locations.Location;
 DROP TABLE IF EXISTS locations.Area;
 DROP TABLE IF EXISTS locations.Country;
@@ -53,7 +54,8 @@ CREATE TABLE locations.Country (
     CONSTRAINT PK_CountryId PRIMARY KEY CLUSTERED (CountryId),
 
     -- * Foreign key constraint for the Region ID this country belongs to
-    CONSTRAINT FK_Country_Region FOREIGN KEY (RegionId) REFERENCES locations.Region (RegionId)
+    CONSTRAINT FK_Country_Region FOREIGN KEY (RegionId)
+    REFERENCES locations.Region (RegionId)
     ON UPDATE CASCADE
 );
 
@@ -84,7 +86,8 @@ CREATE TABLE locations.Area (
     CONSTRAINT PK_AreaId PRIMARY KEY CLUSTERED (AreaId),
 
     -- * Foreign key constraint for the Country ID this area belongs to
-    CONSTRAINT FK_Area_Country FOREIGN KEY (CountryId) REFERENCES locations.Country (CountryId)
+    CONSTRAINT FK_Area_Country FOREIGN KEY (CountryId)
+    REFERENCES locations.Country (CountryId)
     ON UPDATE CASCADE
 );
 
@@ -115,7 +118,8 @@ CREATE TABLE locations.Location (
     CONSTRAINT PK_LocationId PRIMARY KEY CLUSTERED (LocationId),
 
     -- * Foreign key constraint for the Area ID this location belongs to
-    CONSTRAINT FK_Location_Area FOREIGN KEY (AreaId) REFERENCES locations.Area (AreaId)
+    CONSTRAINT FK_Location_Area FOREIGN KEY (AreaId)
+    REFERENCES locations.Area (AreaId)
     ON UPDATE CASCADE
 );
 

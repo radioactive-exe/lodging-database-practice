@@ -1,3 +1,6 @@
+-- ? Switch to the Airbnb database if not already switched
+USE [Airbnb];
+
 /* =====================================
 =         Creating the schemas         =
 ===================================== */

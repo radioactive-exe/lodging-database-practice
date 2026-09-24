@@ -15,7 +15,11 @@ IF
         DROP DATABASE Airbnb;
     END
 
+PRINT 'Dropped Airbnb database (if it existed).';
+
 GO
 
 -- ? And then recreate it from scratch
 CREATE DATABASE Airbnb;
+
+PRINT 'Created Airbnb database.';

@@ -1,3 +1,6 @@
+-- ? Ensure we are testing the Airbnb database
+USE [Airbnb];
+
 /* =====================================
 =   Test cases for individual tables   =
 ===================================== */
@@ -313,7 +316,7 @@ ORDER BY NumOfReviews DESC;
 ====================================== */
 
 -- ? Gets the names of collections and their creators where the creator has added at
--- ? least one of the ? properties in it, AND when the properties they have added have
+-- ? least one of the properties in it, AND when the properties they have added have
 -- ? reviews (aka > 0* with our small dataset)
 
 WITH
@@ -354,7 +357,7 @@ HAVING (
 );
 
 -- ? Gets the total number of collections and the total number of distinct properties
--- ? saved in all of them ? for each user, as well as the number of properties they
+-- ? saved in all of them for each user, as well as the number of properties they
 -- ? host and the compiled minimum and maximum guest counts for them
 
 WITH
@@ -394,9 +397,9 @@ INNER JOIN HostsAndMinMaxOcc ON UserAccount.UserId = HostsAndMinMaxOcc.UserId
 GROUP BY UserAccount.UserId, HostsAndPropertyCount.PropertyCount, HostsAndMinMaxOcc.CompiledMinOccupants, HostsAndMinMaxOcc.CompiledMaxOccupants
 ORDER BY UserAccount.UserId;
 
--- ? Ranks hosts by the number of cross-country bookings, the number of countries these
--- ? cross-country bookings came from, the number of reviews received by these cross
--- ? country bookings, the number of reviews above the average database rating
+-- ? Ranks hosts by the number of cross-country bookings, the number of countries
+-- ? these cross-country bookings came from, the number of reviews received by these
+-- ? cross country bookings, the number of reviews above the average database rating
 
 WITH
     AverageRating AS (

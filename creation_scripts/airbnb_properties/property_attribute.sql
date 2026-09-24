@@ -45,7 +45,8 @@ CREATE TABLE properties.PropertyAttribute (
     AttributeName        varchar(64) NOT NULL UNIQUE,
     AttributeDescription varchar(256),
 
-    -- ? Whether this attribute depends on users, like being a Guest Favourite vs Free Wifi
+    -- ? Whether this attribute depends on users, like being a Guest Favourite vs
+    -- ? Free Wifi
     IsUserBased          bit DEFAULT (0) NOT NULL,
 
     /* Constraints
@@ -55,7 +56,8 @@ CREATE TABLE properties.PropertyAttribute (
     CONSTRAINT PK_PropertyAttribute PRIMARY KEY CLUSTERED (AttributeId),
 
     -- * Foreign key constraint for the attribute type
-    CONSTRAINT FK_PropertyAttribute_Type FOREIGN KEY (AttributeTypeId) REFERENCES properties.AttributeType (TypeId)
+    CONSTRAINT FK_PropertyAttribute_Type FOREIGN KEY (AttributeTypeId)
+    REFERENCES properties.AttributeType (TypeId)
     ON UPDATE CASCADE
 );
 
@@ -80,8 +82,9 @@ CREATE TABLE properties.AssignedPropertyAttributes (
     -- * The attribute being assigned to the property
     AttributeId smallint NOT NULL,
 
-    -- ? Whether the attribute is notable for this property and so should be outlined/emphasised,
-    -- ? such as being the only property in the area to have Free Parking, etc.
+    -- ? Whether the attribute is notable for this property and so should be
+    -- ? outlined/emphasised, such as being the only property in the area to have
+    -- ? Free Parking, etc.
     IsNotable   bit DEFAULT (0) NOT NULL,
 
     /* Constraints
@@ -91,10 +94,12 @@ CREATE TABLE properties.AssignedPropertyAttributes (
     CONSTRAINT PK_AssignedPropAttr PRIMARY KEY CLUSTERED (PropertyId, AttributeId),
 
     -- * Foreign key constraints for both the property and attribute IDs
-    CONSTRAINT FK_AssignedPropAttr_Property FOREIGN KEY (PropertyId) REFERENCES properties.Property (PropertyId)
+    CONSTRAINT FK_AssignedPropAttr_Property FOREIGN KEY (PropertyId)
+    REFERENCES properties.Property (PropertyId)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
-    CONSTRAINT FK_AssignedPropAttr_Attribute FOREIGN KEY (AttributeId) REFERENCES properties.PropertyAttribute (AttributeId)
+    CONSTRAINT FK_AssignedPropAttr_Attribute FOREIGN KEY (AttributeId)
+    REFERENCES properties.PropertyAttribute (AttributeId)
     ON UPDATE CASCADE
     ON DELETE CASCADE
 );

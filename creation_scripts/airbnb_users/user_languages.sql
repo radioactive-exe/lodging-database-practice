@@ -45,14 +45,17 @@ CREATE TABLE users.UserLanguages (
     CONSTRAINT PK_UserLang PRIMARY KEY CLUSTERED (UserId, LangId),
 
     -- * The foreign key constraints for both IDs
-    CONSTRAINT FK_UserLang_User FOREIGN KEY (UserId) REFERENCES users.UserAccount (UserId)
+    CONSTRAINT FK_UserLang_User FOREIGN KEY (UserId)
+    REFERENCES users.UserAccount (UserId)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
-    CONSTRAINT FK_UserLang_Lang FOREIGN KEY (LangId) REFERENCES users.Languages (LangId)
+    CONSTRAINT FK_UserLang_Lang FOREIGN KEY (LangId)
+    REFERENCES users.Languages (LangId)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
 
-    -- * The Unique constraint that ensures each each user-language combination only occurs once
+    -- * The Unique constraint that ensures each each user-language combination only
+    -- * occurs once
     CONSTRAINT UQ_User_Lang UNIQUE (UserId, LangId)
 );
 

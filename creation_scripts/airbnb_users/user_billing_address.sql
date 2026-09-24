@@ -19,7 +19,8 @@ CREATE TABLE users.BillingAddress (
     AddressLine1   nvarchar(100) NOT NULL,
     -- * For example, room/floor/building
     AddressLine2   nvarchar(100),
-    -- ? Renamed to include global codes, and made nullable because some countries don't have them at all
+    -- ? Renamed to include global codes, and made nullable because some countries
+    -- ? don't have them at all
     PostalCode     nvarchar(20),
     AddressCountry smallint NOT NULL,
 
@@ -30,7 +31,8 @@ CREATE TABLE users.BillingAddress (
     CONSTRAINT PK_BillingAddressId PRIMARY KEY CLUSTERED (AddressId),
 
     -- * Foreign key constraint for the Country ID this Billing Address is in
-    CONSTRAINT FK_BillingAddress_Country FOREIGN KEY (AddressCountry) REFERENCES locations.Country (CountryId)
+    CONSTRAINT FK_BillingAddress_Country FOREIGN KEY (AddressCountry)
+    REFERENCES locations.Country (CountryId)
     ON UPDATE CASCADE
 );
 

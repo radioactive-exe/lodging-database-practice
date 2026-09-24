@@ -1,5 +1,5 @@
 /* =====================================
-=        User Payment Method LUT       =
+=       User Payment Method Table      =
 ===================================== */
 
 DROP TABLE IF EXISTS users.PaymentMethod;
@@ -26,13 +26,17 @@ CREATE TABLE users.PaymentMethod (
     ===================================== */
 
     -- * Originally, I planned to just include the Cardholder name as one of the fields in
-    -- * credit cards or other types that needed names, and instead take the name based on the OwnerId.
-    -- ! However, I realised that the payment method name can very commonly be different than the account's owner
-    -- ! For example, using a shared credit card with a spouse's name, using a parent's bank account, using a shared
-    -- ! crypto wallet, etc. This was thus split off into a dedicated billing-related name for this purpose.
+    -- * credit cards or other types that needed names, and instead take the name
+    -- * based on the OwnerId.
+    -- ! However, I realised that the payment method name can very commonly be
+    -- ! different than the account's owner For example, using a shared credit card
+    -- ! with a spouse's name, using a parent's bank account, using a shared crypto
+    -- ! wallet, etc. This was thus split off into a dedicated billing-related name for
+    -- ! this purpose.
     BillingName                nvarchar(100) NOT NULL,
 
-    -- * Neutral/multi-purpose fields, the values of which are enforced based on the method type using constraints
+    -- * Neutral/multi-purpose fields, the values of which are enforced based on the
+    -- * method type using constraints
     Field1                     varchar(100),
     Field2                     varchar(100),
     Field3                     varchar(100),
@@ -46,12 +50,15 @@ CREATE TABLE users.PaymentMethod (
     CONSTRAINT PK_PaymentMethodId PRIMARY KEY CLUSTERED (MethodId),
 
     -- * Foreign key constraint for the payment method type ID
-    CONSTRAINT FK_PaymentMethod_MethodType FOREIGN KEY (MethodType) REFERENCES reservations.PaymentMethodType (TypeId),
+    CONSTRAINT FK_PaymentMethod_MethodType FOREIGN KEY (MethodType)
+    REFERENCES reservations.PaymentMethodType (TypeId),
     -- * Foreign key constraint for the payment method's associated billing address
-    CONSTRAINT FK_PaymentMethod_BillingAddress FOREIGN KEY (BillingAddress) REFERENCES users.BillingAddress (AddressId)
+    CONSTRAINT FK_PaymentMethod_BillingAddress FOREIGN KEY (BillingAddress)
+    REFERENCES users.BillingAddress (AddressId)
     ON UPDATE CASCADE,
     -- * Foreign key constraint for the user who saved/added the payment method
-    CONSTRAINT FK_PaymentMethod_User FOREIGN KEY (OwnerId) REFERENCES users.UserAccount (UserId)
+    CONSTRAINT FK_PaymentMethod_User FOREIGN KEY (OwnerId)
+    REFERENCES users.UserAccount (UserId)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
 
@@ -61,7 +68,8 @@ CREATE TABLE users.PaymentMethod (
     /* Type-specific Constraints
     ===================================== */
 
-    -- ? The payment method types will be populated manually, with the following order:
+    -- ? The payment method types will be populated manually, with the following
+    -- ? order:
     -- ?    1 - Card
     -- ?    2 - Digital Wallet (Google/Apple pay)
     -- ?    3 - Paypal/Venmo
@@ -77,8 +85,8 @@ CREATE TABLE users.PaymentMethod (
             -- ? Checking the card number
             dbo.FN_IsValidCardNumber(Field1) = 1
 
-            -- ! The month and year are separate both for normal forms and for easier checks
-            -- ! and validation (see trigger below)
+            -- ! The month and year are separate both for normal forms and for easier
+            -- ! checks and validation (see trigger below)
             -- ? Checking the month, 2 digits between 1 and 12 in value (01 = 1, etc.)
             AND REGEXP_LIKE(Field2, '^[0-9]{2}$')
             AND CAST(Field2 AS int) BETWEEN 1 AND 12
@@ -100,8 +108,9 @@ CREATE TABLE users.PaymentMethod (
         MethodType <> 2
         -- ? Otherwise, check digital wallet fields
         OR (
-            -- ? Checks the full merchant/payment token (Letters, numbers, underscores, hyphens),
-            -- ? assuming this is handled by the frontend through stripe
+            -- ? Checks the full merchant/payment token (Letters, numbers,
+            -- ? underscores, hyphens), assuming this is handled by the frontend
+            -- ? through stripe
             -- ? (https://gist.github.com/fnky/76f533366f75cf75802c8052b577e2a5?permalink_comment_id=4346671#gistcomment-4346671)
             REGEXP_LIKE(Field1, '^[a-z]{2,5}_[0-9A-Za-z]{8,58}$')
 
@@ -131,7 +140,8 @@ CREATE TABLE users.PaymentMethod (
             )
             OR
             (
-            -- ? If it is Venmo, Field1 stores the username (starts with @, allows letters/numbers/hyphens/underscores)
+            -- ? If it is Venmo, Field1 stores the username (starts with @, allows
+            -- ? letters/numbers/hyphens/underscores)
                 Field4 = 'VENMO'
                 AND dbo.FN_IsValidUsername(Field1) = 1
             )
@@ -148,9 +158,11 @@ CREATE TABLE users.PaymentMethod (
         -- ? If the method is not a BNPL system, skip
         MethodType <> 4
         OR (
-            -- ? Check the stored/saved token, usually between 30-60 characters with numbers, letters,
-            -- ? hyphens, underscores, and sometimes slashes. Length limits are with padding
-            -- ? eg: (https://documentation.lemonway.com/reference/moneyins_cardwebinitpost)
+            -- ? Check the stored/saved token, usually between 30-60 characters with
+            -- ? numbers, letters, hyphens, underscores, and sometimes slashes.
+            -- ? Length limits are with padding.
+            -- ? eg:
+            -- ? (https://documentation.lemonway.com/reference/moneyins_cardwebinitpost)
             REGEXP_LIKE(Field1, '^[A-Za-z0-9_/-]{10,100}$')
             AND
 
@@ -169,9 +181,10 @@ CREATE TABLE users.PaymentMethod (
         -- ? If the method is not a Bank account/transfer location, skip
         MethodType <> 5
         OR (
-            -- ! NOTE: While there are many other bank transfer types in the real world,
-            -- ! I will keep this Bank transfer to a simple IBAN system. Otherwise, there
-            -- ! can be easy checks similar to the Paypal/Venmo options shown above
+            -- ! NOTE: While there are many other bank transfer types in the real
+            -- ! world, I will keep this Bank transfer to a simple IBAN system.
+            -- ! Otherwise, there can be easy checks similar to the Paypal/Venmo
+            -- ! options shown above
             -- ? Checks the IBAN  (https://www.iban.com/structure)
             REGEXP_LIKE(Field1, '^[A-Z]{2}[0-9]{2}[A-Z0-9]{10,30}$')
 
@@ -233,7 +246,8 @@ BEGIN
         AND (
             -- ? If the year is before the current one
             ExpiryYear < @CurrentYear
-            -- ? If the year is more than the approximate max year based on the method type
+            -- ? If the year is more than the approximate max year based on the
+            -- ? method type
             OR ExpiryYear > (
                 @CurrentYear + CASE MethodType
                     -- * If it is a card, then usually 3-5 years

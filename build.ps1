@@ -19,10 +19,10 @@ if ($env:IN_DEV -eq "true") {
     $Username = $DevUser;
     $Password = $DevPass;
 }
-# ? Otherwise, hello professor, this is you running the script. Deploy warnings and prompt as usual
+# ? Otherwise, hello viewer, this is you running the script. Deploy warnings and prompt as usual
 else {
     # ! First, a disclaimer/warning
-    Write-Host "`nWARNING: This script will completely DROP and RECREATE the Airbnb database,
+    Write-Host "`nWARNING: This script will completely DROP and RECREATE the Lodging database,
         scrapping all tables and data and repopulating them from scratch!" -ForegroundColor Red
     Read-Host "Press ENTER to confirm and rebuild, or Ctrl+C to abort"
 
@@ -53,7 +53,7 @@ else {
 $SqlArgs = @{
     # * Either `localhost,1434` or the server you will use
     ServerInstance         = $ServerInstance
-    # * Start at the master database to create Airbnb
+    # * Start at the master database to create Lodging
     Database               = "master"
     # * It will be a server you (or I, in Dev) have set up, so.
     TrustServerCertificate = $true
@@ -106,54 +106,54 @@ $DatabaseCreationFiles = @(
     <# Location schema tables
     ===================================== #>
 
-    "creation_scripts/airbnb_locations/locations.sql",
+    "creation_scripts/lodging_locations/locations.sql",
 
     <# Early schema tables
     ===================================== #>
     # ! These tables need to be made before most other things, or at least before the schemas above their own
 
-    "creation_scripts/airbnb_reservations/reservation_payment_method_type.sql",
+    "creation_scripts/lodging_reservations/reservation_payment_method_type.sql",
 
     <# Users schema tables
     ===================================== #>
 
-    "creation_scripts/airbnb_users/user_tier.sql",
-    "creation_scripts/airbnb_users/user_account.sql",
-    "creation_scripts/airbnb_users/user_profile.sql",
-    "creation_scripts/airbnb_users/user_languages.sql",
-    "creation_scripts/airbnb_users/user_collections.sql",
-    "creation_scripts/airbnb_users/user_billing_address.sql",
-    "creation_scripts/airbnb_users/user_payment_method.sql",
+    "creation_scripts/lodging_users/user_tier.sql",
+    "creation_scripts/lodging_users/user_account.sql",
+    "creation_scripts/lodging_users/user_profile.sql",
+    "creation_scripts/lodging_users/user_languages.sql",
+    "creation_scripts/lodging_users/user_collections.sql",
+    "creation_scripts/lodging_users/user_billing_address.sql",
+    "creation_scripts/lodging_users/user_payment_method.sql",
 
     <# Property schema tables
     ===================================== #>
 
-    "creation_scripts/airbnb_properties/property_type.sql",
-    "creation_scripts/airbnb_properties/property.sql",
-    "creation_scripts/airbnb_properties/property_images.sql",
-    "creation_scripts/airbnb_properties/property_sector.sql",
-    "creation_scripts/airbnb_properties/property_category.sql",
-    "creation_scripts/airbnb_properties/property_attribute.sql",
+    "creation_scripts/lodging_properties/property_type.sql",
+    "creation_scripts/lodging_properties/property.sql",
+    "creation_scripts/lodging_properties/property_images.sql",
+    "creation_scripts/lodging_properties/property_sector.sql",
+    "creation_scripts/lodging_properties/property_category.sql",
+    "creation_scripts/lodging_properties/property_attribute.sql",
 
     # ! This table from the users schema needs the property table already defined
-    "creation_scripts/airbnb_users/user_properties_in_collections.sql"
+    "creation_scripts/lodging_users/user_properties_in_collections.sql"
 
     <# Reservation schema tables
     ===================================== #>
 
-    "creation_scripts/airbnb_reservations/reservation_booking_status.sql",
-    "creation_scripts/airbnb_reservations/reservation_payment_status.sql",
-    "creation_scripts/airbnb_reservations/reservation_payment_purpose.sql",
-    "creation_scripts/airbnb_reservations/reservation_booking.sql",
-    "creation_scripts/airbnb_reservations/reservation_guests.sql",
-    "creation_scripts/airbnb_reservations/reservation_payments.sql",
+    "creation_scripts/lodging_reservations/reservation_booking_status.sql",
+    "creation_scripts/lodging_reservations/reservation_payment_status.sql",
+    "creation_scripts/lodging_reservations/reservation_payment_purpose.sql",
+    "creation_scripts/lodging_reservations/reservation_booking.sql",
+    "creation_scripts/lodging_reservations/reservation_guests.sql",
+    "creation_scripts/lodging_reservations/reservation_payments.sql",
 
     <# Review schema tables
     ===================================== #>
 
-    "creation_scripts/airbnb_reviews/review_property.sql",
-    "creation_scripts/airbnb_reviews/review_criteria.sql",
-    "creation_scripts/airbnb_reviews/review_user.sql"
+    "creation_scripts/lodging_reviews/review_property.sql",
+    "creation_scripts/lodging_reviews/review_criteria.sql",
+    "creation_scripts/lodging_reviews/review_user.sql"
 
 )
 
@@ -193,8 +193,8 @@ foreach ($file in $DatabaseCreationFiles) {
 # ? Clear the file of its current contents (if any)
 Clear-Content -Path "packaged/database_population.sql" -ErrorAction SilentlyContinue
 
-# ? Ensure the population file starts by switching to the Airbnb database
-"USE [Airbnb];`n" + (Get-Content "packaged/database_population.sql") | Set-Content "packaged/database_population.sql"
+# ? Ensure the population file starts by switching to the Lodging database
+"USE [Lodging];`n" + (Get-Content "packaged/database_population.sql") | Set-Content "packaged/database_population.sql"
 
 # ? Cycle through the files
 foreach ($file in $DatabasePopulationFiles) {
@@ -253,10 +253,10 @@ foreach ($FilePath in $PackagedFiles) {
         }
 
         if ($WhichFileFlag -eq 1) {
-            Write-Host "`n  /========================================/`n / All done building the Airbnb Database. / `n/========================================/  " -ForegroundColor Cyan -BackgroundColor DarkCyan
+            Write-Host "`n  /=========================================/`n / All done building the Lodging Database. / `n/=========================================/  " -ForegroundColor Cyan -BackgroundColor DarkCyan
         }
         elseif ($WhichFileFlag -eq 2) {
-            Write-Host "`n  /==========================================/`n / All done Populating the Airbnb Database. / `n/==========================================/  " -ForegroundColor Cyan -BackgroundColor DarkCyan
+            Write-Host "`n  /===========================================/`n / All done Populating the Lodging Database. / `n/===========================================/  " -ForegroundColor Cyan -BackgroundColor DarkCyan
         }
     }
     else {

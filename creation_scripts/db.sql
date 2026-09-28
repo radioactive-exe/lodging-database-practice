@@ -1,25 +1,25 @@
 -- ? Just to make sure we are executing these steps starting from the master database
 USE [master];
 
--- ? If the Airbnb database already exists, then
+-- ? If the Lodging database already exists, then
 IF
     EXISTS (
         SELECT name FROM sys.databases
-        WHERE name = N'Airbnb'
+        WHERE name = N'Lodging'
     )
     BEGIN
         -- ? Force close all connections and current uses, such as open windows etc.
-        ALTER DATABASE Airbnb SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+        ALTER DATABASE Lodging SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
 
         -- ? Drop it completely
-        DROP DATABASE Airbnb;
+        DROP DATABASE Lodging;
     END
 
-PRINT 'Dropped Airbnb database (if it existed).';
+PRINT 'Dropped Lodging database (if it existed).';
 
 GO
 
 -- ? And then recreate it from scratch
-CREATE DATABASE Airbnb;
+CREATE DATABASE Lodging;
 
-PRINT 'Created Airbnb database.';
+PRINT 'Created Lodging database.';

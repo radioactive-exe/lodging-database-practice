@@ -1,4 +1,4 @@
-USE [Airbnb];
+USE [Lodging];
 
 -- ? Unneeded response of rows affected
 SET NOCOUNT ON;
@@ -305,7 +305,7 @@ VALUES
     1,
     4,
     'Ultimate Host',
-    'Hosts that are notably outstanding in their services, standing out from the rest as consistent guest favourites and Airbnb ambassadors.',
+    'Hosts that are notably outstanding in their services, standing out from the rest as consistent guest favourites and Lodging ambassadors.',
     3,
     0.88,
     'At least 25 non-cancelled bookings in the last year (12 months), with a total User Rating of 4.9 or more.',
@@ -928,7 +928,7 @@ VALUES
     20
 ),
 (
-    'Airbnb chalet',
+    'Lodging chalet',
     '6282 Bashford Street',
     'Room 1874',
     '1035',
@@ -1040,7 +1040,7 @@ VALUES
     14
 ),
 (
-    'Airbnb chalet',
+    'Lodging chalet',
     '8 Haas Court',
     'PO Box 14184',
     '81803',
@@ -1068,14 +1068,14 @@ VALUES
     14
 ),
 (
-    'Airbnb chalet',
+    'Lodging chalet',
     '5 Eastwood Court',
     '7th Floor',
     NULL,
     21
 ),
 (
-    'Airbnb chalet',
+    'Lodging chalet',
     '85325 Quincy Center',
     '3rd Floor',
     '3335',
@@ -7269,11 +7269,13 @@ VALUES
 /* These are 7 review criteria
 ===================================== */
 
--- ! While the official Airbnb website has 6 criteria and the overall rating is a distinct one,
--- ! I have added the ability for different criteria to have different weight to more accurately portray
--- ! the experience. For example, rating 0 on all criteria but then putting a 5* rating as the overall
--- ! rating makes no sense. So, the "overall experience" is now a seventh criteria, and a true mathematical
--- ! overall rating is generated based on these criteria and their relevant weights.
+-- ! While the official Airbnb website, which inspired this project has 6 criteria
+-- ! and the overall rating is a distinct one, I have added the ability for different
+-- ! criteria to have different weight to more accurately portray the experience. For
+-- ! example, rating 0 on all criteria but then putting a 5* rating as the overall
+-- ! rating makes no sense. So, the "overall experience" is now a seventh criteria, and
+-- ! a true mathematical overall rating is generated based on these criteria and
+-- ! their relevant weights.
 -- ! (https://www.airbnb.com/resources/hosting-homes/a/why-reviews-matter-41)
 
 ('Check-in', 'How easy it was to find the location and get inside.', 1),

@@ -13,11 +13,13 @@ VALUES
 /* These are 7 review criteria
 ===================================== */
 
--- ! While the official Airbnb website has 6 criteria and the overall rating is a distinct one,
--- ! I have added the ability for different criteria to have different weight to more accurately portray
--- ! the experience. For example, rating 0 on all criteria but then putting a 5* rating as the overall
--- ! rating makes no sense. So, the "overall experience" is now a seventh criteria, and a true mathematical
--- ! overall rating is generated based on these criteria and their relevant weights.
+-- ! While the official Airbnb website, which inspired this project has 6 criteria
+-- ! and the overall rating is a distinct one, I have added the ability for different
+-- ! criteria to have different weight to more accurately portray the experience. For
+-- ! example, rating 0 on all criteria but then putting a 5* rating as the overall
+-- ! rating makes no sense. So, the "overall experience" is now a seventh criteria, and
+-- ! a true mathematical overall rating is generated based on these criteria and
+-- ! their relevant weights.
 -- ! (https://www.airbnb.com/resources/hosting-homes/a/why-reviews-matter-41)
 
 ('Check-in', 'How easy it was to find the location and get inside.', 1),

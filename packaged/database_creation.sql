@@ -1,33 +1,33 @@
 -- ? Just to make sure we are executing these steps starting from the master database
 USE [master];
 
--- ? If the Airbnb database already exists, then
+-- ? If the Lodging database already exists, then
 IF
     EXISTS (
         SELECT name FROM sys.databases
-        WHERE name = N'Airbnb'
+        WHERE name = N'Lodging'
     )
     BEGIN
         -- ? Force close all connections and current uses, such as open windows etc.
-        ALTER DATABASE Airbnb SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+        ALTER DATABASE Lodging SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
 
         -- ? Drop it completely
-        DROP DATABASE Airbnb;
+        DROP DATABASE Lodging;
     END
 
-PRINT 'Dropped Airbnb database (if it existed).';
+PRINT 'Dropped Lodging database (if it existed).';
 
 GO
 
 -- ? And then recreate it from scratch
-CREATE DATABASE Airbnb;
+CREATE DATABASE Lodging;
 
-PRINT 'Created Airbnb database.';
+PRINT 'Created Lodging database.';
 
 GO
 
--- ? Switch to the Airbnb database if not already switched
-USE [Airbnb];
+-- ? Switch to the Lodging database if not already switched
+USE [Lodging];
 
 /* =====================================
 =         Creating the schemas         =
@@ -749,7 +749,7 @@ users.UserProfile (
     -- * Automatically-populated UUID, which will be used in profile URLs and other
     -- * public-facing contexts.
     -- ! This was used in place of the original UUID and profile ID setup after more
-    -- ! understanding of privacy and UUIDs. Also, instead of using Airbnb's numeric
+    -- ! understanding of privacy and UUIDs. Also, instead of using generated numeric
     -- ! IDs for profile URLs etc., using a UUID is easier to generate
     PublicUserUuid    uniqueidentifier DEFAULT NEWID() NOT NULL UNIQUE,
 
@@ -2285,7 +2285,7 @@ BEGIN
 
     -- ? If the booking we are tracking has been cancelled, then the full cost
     -- ? starting point is now nothing
-    -- ! If there were a cancellation fee implemented in the hypothetical airbnb
+    -- ! If there were a cancellation fee implemented in the hypothetical Lodging
     -- ! system we are making, then it would simply be that number instead of 0 here,
     -- ! or even that percentage * the total cost, etc. But, the same logic applies,
     -- ? We do this so that if a booking is cancelled and the customer has already

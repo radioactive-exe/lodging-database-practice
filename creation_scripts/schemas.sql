@@ -1,5 +1,5 @@
--- ? Switch to the Airbnb database if not already switched
-USE [Airbnb];
+-- ? Switch to the Lodging database if not already switched
+USE [Lodging];
 
 /* =====================================
 =         Creating the schemas         =

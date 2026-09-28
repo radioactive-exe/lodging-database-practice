@@ -112,7 +112,7 @@ VALUES
     1,
     4,
     'Ultimate Host',
-    'Hosts that are notably outstanding in their services, standing out from the rest as consistent guest favourites and Airbnb ambassadors.',
+    'Hosts that are notably outstanding in their services, standing out from the rest as consistent guest favourites and Lodging ambassadors.',
     3,
     0.88,
     'At least 25 non-cancelled bookings in the last year (12 months), with a total User Rating of 4.9 or more.',

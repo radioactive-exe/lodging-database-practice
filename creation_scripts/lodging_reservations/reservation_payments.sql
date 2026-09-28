@@ -150,7 +150,7 @@ BEGIN
 
     -- ? If the booking we are tracking has been cancelled, then the full cost
     -- ? starting point is now nothing
-    -- ! If there were a cancellation fee implemented in the hypothetical airbnb
+    -- ! If there were a cancellation fee implemented in the hypothetical Lodging
     -- ! system we are making, then it would simply be that number instead of 0 here,
     -- ! or even that percentage * the total cost, etc. But, the same logic applies,
     -- ? We do this so that if a booking is cancelled and the customer has already

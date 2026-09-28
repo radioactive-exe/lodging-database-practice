@@ -33,7 +33,7 @@ VALUES
     20
 ),
 (
-    'Airbnb chalet',
+    'Lodging chalet',
     '6282 Bashford Street',
     'Room 1874',
     '1035',
@@ -145,7 +145,7 @@ VALUES
     14
 ),
 (
-    'Airbnb chalet',
+    'Lodging chalet',
     '8 Haas Court',
     'PO Box 14184',
     '81803',
@@ -173,14 +173,14 @@ VALUES
     14
 ),
 (
-    'Airbnb chalet',
+    'Lodging chalet',
     '5 Eastwood Court',
     '7th Floor',
     NULL,
     21
 ),
 (
-    'Airbnb chalet',
+    'Lodging chalet',
     '85325 Quincy Center',
     '3rd Floor',
     '3335',

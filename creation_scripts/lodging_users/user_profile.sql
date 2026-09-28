@@ -16,7 +16,7 @@ users.UserProfile (
     -- * Automatically-populated UUID, which will be used in profile URLs and other
     -- * public-facing contexts.
     -- ! This was used in place of the original UUID and profile ID setup after more
-    -- ! understanding of privacy and UUIDs. Also, instead of using Airbnb's numeric
+    -- ! understanding of privacy and UUIDs. Also, instead of using generated numeric
     -- ! IDs for profile URLs etc., using a UUID is easier to generate
     PublicUserUuid    uniqueidentifier DEFAULT NEWID() NOT NULL UNIQUE,
 

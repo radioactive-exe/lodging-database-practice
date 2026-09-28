@@ -1,5 +1,5 @@
--- ? Ensure we are testing the Airbnb database
-USE [Airbnb];
+-- ? Ensure we are testing the Lodging database
+USE [Lodging];
 
 /* =====================================
 =   Test cases for individual tables   =
@@ -29,7 +29,7 @@ ORDER BY UserAccount.UserTier ASC;
 ===================================== */
 
 -- ? Gets the public UUIDs and full names of all users who have a Linkedin account
--- ? connected to their Airbnb accounts
+-- ? connected to their Lodging accounts
 
 SELECT
     PublicUserUuid,

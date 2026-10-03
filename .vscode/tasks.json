@@ -4,7 +4,7 @@
         {
             "type": "shell",
             "label": "Set up database",
-            "detail": "Use build.ps1 to drop and recreate the Airbnb Database",
+            "detail": "Use build.ps1 to drop and recreate the Lodging Database",
             "command": "powershell",
             "args": [
                 "-NoProfile",
